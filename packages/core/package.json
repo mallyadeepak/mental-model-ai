@@ -6,7 +6,7 @@
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/anthropics/mental-model-ai.git",
+    "url": "https://github.com/mallyadeepak/mental-model-ai.git",
     "directory": "packages/core"
   },
   "keywords": ["mental-model", "ai", "diagram", "visualization", "anthropic", "openai", "claude"],

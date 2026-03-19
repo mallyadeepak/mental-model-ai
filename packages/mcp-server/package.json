@@ -4,7 +4,7 @@
   "description": "MCP server for generating mental model diagrams in Claude Code",
   "repository": {
     "type": "git",
-    "url": "https://github.com/anthropics/mental-model-ai.git",
+    "url": "https://github.com/mallyadeepak/mental-model-ai.git",
     "directory": "packages/mcp-server"
   },
   "type": "module",

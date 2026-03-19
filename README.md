@@ -35,7 +35,7 @@ mental-model-ai/
 
 ```bash
 # Clone the repository
-git clone https://github.com/anthropics/mental-model-ai.git
+git clone https://github.com/mallyadeepak/mental-model-ai.git
 cd mental-model-ai
 
 # Install dependencies
