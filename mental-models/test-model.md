@@ -2,7 +2,12 @@
 
 > A test mental model
 
-**Diagram Type:** mindmap
+## Diagram
+
+```mermaid
+mindmap
+  (Root)
+```
 
 ## Concepts
 
