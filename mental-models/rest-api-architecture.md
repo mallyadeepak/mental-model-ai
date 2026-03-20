@@ -18,10 +18,10 @@ flowchart TB
   n6(Statelessness)
   n7[GET]
   n8[POST]
-  n9[PUT / PATCH]
+  n9[PUT and PATCH]
   n10[DELETE]
-  n11[/JSON Response/]
-  n12[/HTTP Status Codes/]
+  n11(["JSON Response"])
+  n12(["HTTP Status Codes"])
   class n1,n2,n3,n4,n5,n6 concept
   class n7,n8,n9,n10 process
   class n11,n12 example
@@ -35,7 +35,7 @@ flowchart TB
   subgraph Legend
     L1(Concept):::concept
     L2[Process]:::process
-    L3[/Example/]:::example
+    L3(["Example"]):::example
     L4{{Analogy}}:::analogy
   end
 ```
@@ -56,7 +56,7 @@ flowchart TB
       _Retrieve a resource without modifying it_
     - **POST** [Process]
       _Create a new resource_
-    - **PUT / PATCH** [Process]
+    - **PUT and PATCH** [Process]
       _Replace or partially update an existing resource_
     - **DELETE** [Process]
       _Remove a resource_

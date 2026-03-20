@@ -15,11 +15,11 @@ flowchart TB
   n3(useEffect)
   n4(useContext)
   n5(useRef)
-  n6(useMemo / useCallback)
+  n6(useMemo and useCallback)
   n7[State Update]
   n8(Dependency Array)
   n9[Cleanup Function]
-  n10[/Custom Hook/]
+  n10(["Custom Hook"])
   class n1,n2,n3,n4,n5,n6,n8 concept
   class n7,n9 process
   class n10 example
@@ -33,7 +33,7 @@ flowchart TB
   subgraph Legend
     L1(Concept):::concept
     L2[Process]:::process
-    L3[/Example/]:::example
+    L3(["Example"]):::example
     L4{{Analogy}}:::analogy
   end
 ```
@@ -49,14 +49,14 @@ flowchart TB
   - **useEffect** [Concept]
     _Runs side effects (data fetching, subscriptions, DOM updates) after render_
     - **Dependency Array** [Concept]
-      _Controls when useEffect re-runs: empty = once, omitted = every render, [dep] = when dep changes_
+      _Controls when useEffect re-runs: empty = once, omitted = every render, listed deps = when dep changes_
     - **Cleanup Function** [Process]
       _Returned from useEffect to cancel subscriptions or timers when component unmounts_
   - **useContext** [Concept]
     _Reads a React context value without wrapping in a consumer component_
   - **useRef** [Concept]
     _Holds a mutable value that persists across renders without triggering re-renders_
-  - **useMemo / useCallback** [Concept]
+  - **useMemo and useCallback** [Concept]
     _Memoize expensive values or functions to avoid unnecessary recalculation_
   - **Custom Hook** [Example]
     _A function that composes built-in hooks to encapsulate and reuse stateful logic_
@@ -68,7 +68,7 @@ flowchart TB
 - **useEffect** → *optionally returns* → **Cleanup Function**
 - **Custom Hook** → *composes* → **useState**
 - **Custom Hook** → *composes* → **useEffect**
-- **useMemo / useCallback** → *optimizes re-renders from* → **useState**
+- **useMemo and useCallback** → *optimizes re-renders from* → **useState**
 
 ## Real-World Analogies
 

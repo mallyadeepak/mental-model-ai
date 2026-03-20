@@ -18,8 +18,8 @@ flowchart TB
   n6(Remote)
   n7[git add]
   n8[git commit]
-  n9[git merge / rebase]
-  n10[git push / pull]
+  n9[git merge and rebase]
+  n10[git push and pull]
   class n1,n2,n4,n5,n6 concept
   class n3,n7,n8,n9,n10 process
   n2 ==>|staged via git add| n3
@@ -31,7 +31,7 @@ flowchart TB
   subgraph Legend
     L1(Concept):::concept
     L2[Process]:::process
-    L3[/Example/]:::example
+    L3(["Example"]):::example
     L4{{Analogy}}:::analogy
   end
 ```
@@ -52,11 +52,11 @@ flowchart TB
       _Record staged changes as a new commit with a message_
   - **Branches** [Concept]
     _Parallel lines of development that diverge from a shared history_
-    - **git merge / rebase** [Process]
+    - **git merge and rebase** [Process]
       _Integrate changes from one branch into another_
   - **Remote** [Concept]
     _A hosted copy of the repository (e.g., GitHub) for sharing and backup_
-    - **git push / pull** [Process]
+    - **git push and pull** [Process]
       _Sync commits between local repo and remote_
 
 ## Relationships

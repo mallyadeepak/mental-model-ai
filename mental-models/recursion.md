@@ -14,9 +14,9 @@ flowchart TB
   n2(Base Case)
   n3[Recursive Case]
   n4(Call Stack)
-  n5[/Stack Frame/]
-  n6[/Stack Overflow/]
-  n7[/Factorial (n!)/]
+  n5(["Stack Frame"])
+  n6(["Stack Overflow"])
+  n7(["Factorial Example"])
   class n1,n2,n4 concept
   class n3 process
   class n5,n6,n7 example
@@ -28,7 +28,7 @@ flowchart TB
   subgraph Legend
     L1(Concept):::concept
     L2[Process]:::process
-    L3[/Example/]:::example
+    L3(["Example"]):::example
     L4{{Analogy}}:::analogy
   end
 ```
@@ -41,7 +41,7 @@ flowchart TB
     _The stopping condition — a simple input solved directly without another recursive call_
   - **Recursive Case** [Process]
     _Breaks the problem into a smaller version and calls the function again_
-    - **Factorial (n!)** [Example]
+    - **Factorial Example** [Example]
       _factorial(n) = n * factorial(n-1), base case: factorial(0) = 1_
   - **Call Stack** [Concept]
     _The stack of pending function calls built up during recursion, unwound on each return_
@@ -59,7 +59,7 @@ flowchart TB
 
 ## Real-World Analogies
 
-### Recursion ↔ Russian nesting dolls (Matryoshka)
+### Recursion ↔ Russian nesting dolls
 
 Each doll contains a smaller version of itself. Opening a doll (a recursive call) reveals another doll, until you reach the smallest one with nothing inside (the base case). Closing them back up mirrors the return journey up the call stack.
 

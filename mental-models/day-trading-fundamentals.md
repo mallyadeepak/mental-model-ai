@@ -17,18 +17,18 @@ flowchart TB
   n5(Risk Management)
   n6(Hedging)
   n7(Candlestick)
-  n8(Support & Resistance)
+  n8(Support and Resistance)
   n9(Volume)
   n10[Market Order]
   n11[Limit Order]
   n12[Stop-Loss Order]
-  n13(Moving Average (MA))
-  n14[/MA Crossover Strategy/]
-  n15(RSI (Relative Strength Index))
+  n13(Moving Average)
+  n14(["MA Crossover Strategy"])
+  n15(RSI)
   n16[Position Sizing]
-  n17(Risk/Reward Ratio)
+  n17(Risk-Reward Ratio)
   n18(Long vs Short)
-  n19[/Candle Patterns/]
+  n19(["Candle Patterns"])
   class n1,n2,n3,n4,n5,n6,n7,n8,n9,n13,n15,n17,n18 concept
   class n10,n11,n12,n16 process
   class n14,n19 example
@@ -47,7 +47,7 @@ flowchart TB
   subgraph Legend
     L1(Concept):::concept
     L2[Process]:::process
-    L3[/Example/]:::example
+    L3(["Example"]):::example
     L4{{Analogy}}:::analogy
   end
 ```
@@ -59,13 +59,13 @@ flowchart TB
   - **Price Charts** [Concept]
     _Visual representations of an asset's price over time — the trader's primary tool for reading the market_
     - **Candlestick** [Concept]
-      _A single candle shows Open, High, Low, Close for a time period. Body = open-to-close range, Wick = high/low extremes. Green = price rose, Red = price fell_
+      _Shows Open, High, Low, Close for a time period. Body = open-to-close range, Wick = high/low extremes. Green = rose, Red = fell_
       - **Candle Patterns** [Example]
-        _Multi-candle formations that signal reversals or continuation: Doji (indecision), Hammer (bullish reversal), Engulfing (strong reversal)_
-    - **Support & Resistance** [Concept]
-      _Price levels where buying (support) or selling (resistance) historically concentrate, acting as floors and ceilings_
+        _Multi-candle formations that signal reversals: Doji (indecision), Hammer (bullish reversal), Engulfing (strong reversal)_
+    - **Support and Resistance** [Concept]
+      _Price levels where buying or selling historically concentrates, acting as floors and ceilings_
     - **Volume** [Concept]
-      _Number of shares/contracts traded in a period. High volume confirms a move; low volume = weak signal_
+      _Number of shares traded in a period. High volume confirms a move; low volume = weak signal_
   - **Orders** [Concept]
     _Instructions sent to a broker to buy or sell an asset at specified conditions_
     - **Market Order** [Process]
@@ -73,35 +73,35 @@ flowchart TB
     - **Limit Order** [Process]
       _Buy or sell only at a specified price or better — gives price control but may not fill_
     - **Stop-Loss Order** [Process]
-      _Automatically sells if price falls to a set level — your safety net that caps the maximum loss on a trade_
+      _Automatically sells if price falls to a set level — caps the maximum loss on a trade_
   - **Technical Indicators** [Concept]
-    _Mathematical calculations applied to price/volume data to surface trends and signals_
-    - **Moving Average (MA)** [Concept]
-      _Average closing price over N periods, updated each bar. Smooths out noise to reveal the trend direction_
+    _Mathematical calculations applied to price and volume data to surface trends and signals_
+    - **Moving Average** [Concept]
+      _Average closing price over N periods. Smooths out noise to reveal the trend direction_
       - **MA Crossover Strategy** [Example]
-        _When a fast MA (e.g., 9-period) crosses above a slow MA (e.g., 21-period) = buy signal. Cross below = sell signal_
-    - **RSI (Relative Strength Index)** [Concept]
-      _Oscillator from 0-100. Above 70 = overbought (potential reversal down). Below 30 = oversold (potential reversal up)_
+        _Fast MA crosses above slow MA = buy signal. Crosses below = sell signal_
+    - **RSI** [Concept]
+      _Oscillator from 0-100. Above 70 = overbought. Below 30 = oversold_
   - **Risk Management** [Concept]
     _Strategies to limit losses and protect capital — the difference between longevity and blowing up an account_
     - **Position Sizing** [Process]
       _Only risk a fixed % of capital per trade (e.g., 1-2%). Prevents one bad trade from wiping the account_
-    - **Risk/Reward Ratio** [Concept]
-      _Compare potential profit to potential loss. A 1:2 ratio means risking $1 to make $2 — only take trades where reward justifies the risk_
+    - **Risk-Reward Ratio** [Concept]
+      _Compare potential profit to potential loss. A 1:2 ratio means risking $1 to make $2_
   - **Hedging** [Concept]
     _Taking an offsetting position to reduce exposure to an existing trade's risk_
     - **Long vs Short** [Concept]
-      _Long = buy first, profit if price rises. Short = borrow and sell first, profit if price falls — lets traders profit in both directions_
+      _Long = buy first, profit if price rises. Short = sell first, profit if price falls_
 
 ## Relationships
 
-- **Candlestick** → *forms patterns at* → **Support & Resistance**
+- **Candlestick** → *forms patterns at* → **Support and Resistance**
 - **Volume** → *confirms signals from* → **Candlestick**
-- **Support & Resistance** → *triggers placement of* → **Limit Order**
-- **Moving Average (MA)** → *combined with* → **Support & Resistance**
-- **RSI (Relative Strength Index)** → *used alongside* → **Moving Average (MA)**
+- **Support and Resistance** → *triggers placement of* → **Limit Order**
+- **Moving Average** → *combined with* → **Support and Resistance**
+- **RSI** → *used alongside* → **Moving Average**
 - **Technical Indicators** → *generates signals that trigger* → **Orders**
-- **Stop-Loss Order** → *defines the risk side of* → **Risk/Reward Ratio**
+- **Stop-Loss Order** → *defines the risk side of* → **Risk-Reward Ratio**
 - **Position Sizing** → *sets size before placing* → **Stop-Loss Order**
 - **Long vs Short** → *is the mechanism of* → **Hedging**
 - **Hedging** → *is a tool of* → **Risk Management**
@@ -111,15 +111,15 @@ flowchart TB
 
 ### Candlestick ↔ A weather report for price
 
-Just as a weather report tells you the high, low, and average temperature for a day, a candle tells you the high, low, open, and close for a time period. The color tells you whether the 'day' ended warmer (green) or cooler (red) than it started. Patterns of candles are like weather fronts — multiple days of data forming a forecast.
+Just as a weather report tells you the high, low, and average temperature for a day, a candle tells you the high, low, open, and close for a time period. The color tells you whether the day ended warmer (green) or cooler (red) than it started. Patterns of candles are like weather fronts — multiple days of data forming a forecast.
 
-### Moving Average ↔ A car's speedometer vs. GPS average speed
+### Moving Average ↔ GPS average speed vs. speedometer
 
-Moment-to-moment price is like your speedometer — jumpy and noisy. A moving average is like the GPS average speed — smoothed over time to show your true trend. A fast MA (short window) reacts quickly like a speedometer; a slow MA (long window) shows the bigger trend. When they cross, it's like your speed consistently changing direction.
+Moment-to-moment price is like your speedometer — jumpy and noisy. A moving average is like the GPS average speed — smoothed over time to show your true trend. A fast MA reacts quickly; a slow MA shows the bigger trend. When they cross, your speed trend is changing direction.
 
 ### Stop-Loss ↔ A circuit breaker in your house
 
-A circuit breaker automatically cuts power when current exceeds a safe level — you don't have to watch the wires and decide in the moment. A stop-loss does the same for a trade: it automatically exits the position if price drops to a pre-set level, removing emotion from the decision and capping your worst-case loss before it spirals.
+A circuit breaker automatically cuts power when current exceeds a safe level — you do not have to watch the wires and decide in the moment. A stop-loss does the same: it exits the position if price drops to a pre-set level, removing emotion and capping your worst-case loss before it spirals.
 
 ---
 *Generated on 2026-03-20*

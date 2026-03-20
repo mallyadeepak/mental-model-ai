@@ -46,6 +46,11 @@ interface MentalModel {
   analogies: MentalModelAnalogy[];
 }
 
+function sanitizeLabel(label: string): string {
+  // Replace double quotes with single quotes to avoid breaking quoted Mermaid labels
+  return label.replace(/"/g, "'");
+}
+
 function generateMermaidDiagram(model: MentalModel): string {
   const lines: string[] = [];
   const nodeMap = new Map(model.nodes.map((n) => [n.id, n]));
@@ -59,13 +64,16 @@ function generateMermaidDiagram(model: MentalModel): string {
   lines.push('  classDef example fill:#5DAE8B,stroke:#3D7A5E,stroke-width:2px,color:#fff');
   lines.push('  classDef analogy fill:#D4A574,stroke:#A67B4A,stroke-width:2px,color:#fff');
 
-  // Define nodes with distinct shapes per type (no emojis)
+  // Define nodes with distinct shapes per type (no emojis).
+  // Labels are always double-quoted so parentheses, slashes, and other
+  // special characters in the label text cannot break the Mermaid parser.
+  // Shapes: concept=rounded rect, process=rect, example=stadium, analogy=hexagon
   for (const node of model.nodes) {
-    // Different shapes: concept=rounded rect, process=rect, example=parallelogram, analogy=hexagon
-    const shape = node.nodeType === 'concept' ? `${node.id}(${node.label})` :
-                  node.nodeType === 'process' ? `${node.id}[${node.label}]` :
-                  node.nodeType === 'example' ? `${node.id}[/${node.label}/]` :
-                  `${node.id}{{${node.label}}}`;
+    const lbl = sanitizeLabel(node.label);
+    const shape = node.nodeType === 'concept' ? `${node.id}("${lbl}")` :
+                  node.nodeType === 'process' ? `${node.id}["${lbl}"]` :
+                  node.nodeType === 'example' ? `${node.id}(["${lbl}"])` :
+                  `${node.id}{{"${lbl}"}}`;
     lines.push(`  ${shape}`);
   }
 
@@ -96,10 +104,10 @@ function generateMermaidDiagram(model: MentalModel): string {
   // Add legend
   lines.push('');
   lines.push('  subgraph Legend');
-  lines.push('    L1(Concept):::concept');
-  lines.push('    L2[Process]:::process');
-  lines.push('    L3[/Example/]:::example');
-  lines.push('    L4{{Analogy}}:::analogy');
+  lines.push('    L1("Concept"):::concept');
+  lines.push('    L2["Process"]:::process');
+  lines.push('    L3(["Example"]):::example');
+  lines.push('    L4{{"Analogy"}}:::analogy');
   lines.push('  end');
 
   return lines.join('\n');
