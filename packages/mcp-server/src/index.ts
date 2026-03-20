@@ -6,6 +6,131 @@ import {
   CallToolRequestSchema,
   ListToolsRequestSchema,
 } from '@modelcontextprotocol/sdk/types.js';
+import { exec } from 'child_process';
+import { mkdir, writeFile } from 'fs/promises';
+import { join } from 'path';
+import { promisify } from 'util';
+
+const execAsync = promisify(exec);
+
+interface MentalModelNode {
+  id: string;
+  label: string;
+  description: string;
+  depth: number;
+  nodeType: string;
+  parentId?: string | null;
+}
+
+interface MentalModelEdge {
+  id: string;
+  source: string;
+  target: string;
+  label: string;
+  edgeType: string;
+}
+
+interface MentalModelAnalogy {
+  concept: string;
+  realWorldExample: string;
+  explanation: string;
+  relatedNodeId?: string;
+}
+
+interface MentalModel {
+  title: string;
+  summary: string;
+  diagramType: string;
+  nodes: MentalModelNode[];
+  edges: MentalModelEdge[];
+  analogies: MentalModelAnalogy[];
+}
+
+function formatMentalModelAsMarkdown(model: MentalModel): string {
+  const lines: string[] = [];
+
+  // Title and summary
+  lines.push(`# ${model.title}`);
+  lines.push('');
+  lines.push(`> ${model.summary}`);
+  lines.push('');
+  lines.push(`**Diagram Type:** ${model.diagramType}`);
+  lines.push('');
+
+  // Build node hierarchy
+  const nodeMap = new Map(model.nodes.map((n) => [n.id, n]));
+  const rootNodes = model.nodes.filter((n) => !n.parentId || n.parentId === null);
+  const childrenMap = new Map<string, MentalModelNode[]>();
+
+  for (const node of model.nodes) {
+    if (node.parentId) {
+      const children = childrenMap.get(node.parentId) || [];
+      children.push(node);
+      childrenMap.set(node.parentId, children);
+    }
+  }
+
+  // Render nodes hierarchically
+  lines.push('## Concepts');
+  lines.push('');
+
+  function renderNode(node: MentalModelNode, indent: string = ''): void {
+    const typeEmoji: Record<string, string> = {
+      concept: '💡',
+      process: '⚙️',
+      example: '📝',
+      analogy: '🔄',
+    };
+    const emoji = typeEmoji[node.nodeType] || '•';
+
+    lines.push(`${indent}- ${emoji} **${node.label}**`);
+    if (node.description) {
+      lines.push(`${indent}  ${node.description}`);
+    }
+
+    const children = childrenMap.get(node.id) || [];
+    for (const child of children) {
+      renderNode(child, indent + '  ');
+    }
+  }
+
+  for (const root of rootNodes) {
+    renderNode(root);
+    lines.push('');
+  }
+
+  // Relationships
+  if (model.edges.length > 0) {
+    lines.push('## Relationships');
+    lines.push('');
+    for (const edge of model.edges) {
+      const source = nodeMap.get(edge.source);
+      const target = nodeMap.get(edge.target);
+      if (source && target) {
+        lines.push(`- **${source.label}** → *${edge.label}* → **${target.label}**`);
+      }
+    }
+    lines.push('');
+  }
+
+  // Analogies
+  if (model.analogies.length > 0) {
+    lines.push('## Real-World Analogies');
+    lines.push('');
+    for (const analogy of model.analogies) {
+      lines.push(`### ${analogy.concept} ↔ ${analogy.realWorldExample}`);
+      lines.push('');
+      lines.push(analogy.explanation);
+      lines.push('');
+    }
+  }
+
+  // Footer with metadata
+  lines.push('---');
+  lines.push(`*Generated on ${new Date().toISOString().split('T')[0]}*`);
+
+  return lines.join('\n');
+}
 
 const server = new Server(
   {
@@ -82,6 +207,19 @@ server.setRequestHandler(ListToolsRequestSchema, async () => {
             question: { type: 'string', description: 'Specific question about the relationship' },
           },
           required: ['components'],
+        },
+      },
+      {
+        name: 'commit_mental_model',
+        description: 'Save a generated mental model as a readable markdown file and commit it to the git repository.',
+        inputSchema: {
+          type: 'object',
+          properties: {
+            content: { type: 'string', description: 'The mental model JSON content to save' },
+            filename: { type: 'string', description: 'Filename for the mental model (e.g., "react-hooks"). Will be saved as a .md file in mental-models/ directory.' },
+            commitMessage: { type: 'string', description: 'Custom commit message. If not provided, a default message will be generated.' },
+          },
+          required: ['content', 'filename'],
         },
       },
     ],
@@ -188,6 +326,69 @@ Output: ${MENTAL_MODEL_SCHEMA}`;
       return {
         content: [{ type: 'text', text: prompt }],
       };
+    }
+
+    case 'commit_mental_model': {
+      const { content, filename, commitMessage } = args as {
+        content: string;
+        filename: string;
+        commitMessage?: string;
+      };
+
+      try {
+        // Get the git repository root
+        const { stdout: gitRoot } = await execAsync('git rev-parse --show-toplevel');
+        const repoRoot = gitRoot.trim();
+
+        // Create the mental-models directory if it doesn't exist
+        const outputDir = join(repoRoot, 'mental-models');
+        await mkdir(outputDir, { recursive: true });
+
+        // Sanitize filename and ensure .md extension
+        const sanitizedFilename = filename.replace(/[^a-zA-Z0-9-_\.]/g, '-').replace(/\.(json|md)$/, '');
+        const finalFilename = `${sanitizedFilename}.md`;
+        const filePath = join(outputDir, finalFilename);
+
+        // Convert JSON to readable markdown
+        let markdownContent: string;
+        try {
+          const model = JSON.parse(content);
+          markdownContent = formatMentalModelAsMarkdown(model);
+        } catch {
+          // If it's not valid JSON, save as-is in a code block
+          markdownContent = `# Mental Model\n\n\`\`\`json\n${content}\n\`\`\``;
+        }
+
+        // Write the file
+        await writeFile(filePath, markdownContent, 'utf-8');
+
+        // Stage and commit the file
+        const relativePath = `mental-models/${finalFilename}`;
+        await execAsync(`git add "${relativePath}"`, { cwd: repoRoot });
+
+        const message = commitMessage || `Add mental model: ${sanitizedFilename}`;
+        await execAsync(`git commit -m "${message}"`, { cwd: repoRoot });
+
+        return {
+          content: [
+            {
+              type: 'text',
+              text: `Successfully saved and committed mental model.\n\nFile: ${relativePath}\nCommit message: ${message}`,
+            },
+          ],
+        };
+      } catch (error) {
+        const errorMessage = error instanceof Error ? error.message : String(error);
+        return {
+          content: [
+            {
+              type: 'text',
+              text: `Failed to commit mental model: ${errorMessage}`,
+            },
+          ],
+          isError: true,
+        };
+      }
     }
 
     default:

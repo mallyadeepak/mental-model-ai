@@ -84,7 +84,7 @@ async function runTests() {
     })) as { result?: { tools: Array<{ name: string }> } };
 
     const tools = toolsResponse?.result?.tools || [];
-    assert(tools.length === 4, `Should have 4 tools (got ${tools.length})`);
+    assert(tools.length === 5, `Should have 5 tools (got ${tools.length})`);
 
     const toolNames = tools.map((t) => t.name);
     assert(
@@ -96,6 +96,10 @@ async function runTests() {
     assert(
       toolNames.includes('explain_relationship'),
       'Should have explain_relationship tool'
+    );
+    assert(
+      toolNames.includes('commit_mental_model'),
+      'Should have commit_mental_model tool'
     );
 
     // Test 3: Call explain_concept tool
@@ -194,10 +198,49 @@ async function runTests() {
       'explain_relationship should include question'
     );
 
-    // Test 7: Unknown tool should return error
-    const unknownResponse = (await sendRequest(server, {
+    // Test 7: Call commit_mental_model tool (will fail due to no git repo, but should not crash)
+    const sampleModel = JSON.stringify({
+      title: 'Test Model',
+      summary: 'A test mental model',
+      diagramType: 'mindmap',
+      nodes: [
+        {
+          id: 'n1',
+          label: 'Root',
+          description: 'Root node',
+          depth: 0,
+          nodeType: 'concept',
+        },
+      ],
+      edges: [],
+      analogies: [],
+    });
+
+    const commitResponse = (await sendRequest(server, {
       jsonrpc: '2.0',
       id: 7,
+      method: 'tools/call',
+      params: {
+        name: 'commit_mental_model',
+        arguments: {
+          content: sampleModel,
+          filename: 'test-model',
+        },
+      },
+    })) as { result?: { content: Array<{ text: string }>; isError?: boolean } };
+
+    const commitText = commitResponse?.result?.content?.[0]?.text || '';
+    // The tool should return either success or a git-related error (not crash)
+    assert(
+      commitText.includes('Successfully saved') ||
+        commitText.includes('Failed to commit'),
+      'commit_mental_model should return success or git error'
+    );
+
+    // Test 8: Unknown tool should return error
+    const unknownResponse = (await sendRequest(server, {
+      jsonrpc: '2.0',
+      id: 8,
       method: 'tools/call',
       params: {
         name: 'unknown_tool',

@@ -251,6 +251,171 @@ console.log('\n--- Token efficiency tests ---');
   assert(lines <= 12, `explain_relationship prompt should be concise (${lines} lines, expected <=12)`);
 }
 
+// Test 7: Markdown formatting
+console.log('\n--- commit_mental_model markdown tests ---');
+
+interface MentalModelNode {
+  id: string;
+  label: string;
+  description: string;
+  depth: number;
+  nodeType: string;
+  parentId?: string | null;
+}
+
+interface MentalModelEdge {
+  id: string;
+  source: string;
+  target: string;
+  label: string;
+  edgeType: string;
+}
+
+interface MentalModelAnalogy {
+  concept: string;
+  realWorldExample: string;
+  explanation: string;
+  relatedNodeId?: string;
+}
+
+interface MentalModel {
+  title: string;
+  summary: string;
+  diagramType: string;
+  nodes: MentalModelNode[];
+  edges: MentalModelEdge[];
+  analogies: MentalModelAnalogy[];
+}
+
+function formatMentalModelAsMarkdown(model: MentalModel): string {
+  const lines: string[] = [];
+
+  lines.push(`# ${model.title}`);
+  lines.push('');
+  lines.push(`> ${model.summary}`);
+  lines.push('');
+  lines.push(`**Diagram Type:** ${model.diagramType}`);
+  lines.push('');
+
+  const nodeMap = new Map(model.nodes.map((n) => [n.id, n]));
+  const rootNodes = model.nodes.filter((n) => !n.parentId || n.parentId === null);
+  const childrenMap = new Map<string, MentalModelNode[]>();
+
+  for (const node of model.nodes) {
+    if (node.parentId) {
+      const children = childrenMap.get(node.parentId) || [];
+      children.push(node);
+      childrenMap.set(node.parentId, children);
+    }
+  }
+
+  lines.push('## Concepts');
+  lines.push('');
+
+  function renderNode(node: MentalModelNode, indent: string = ''): void {
+    const typeEmoji: Record<string, string> = {
+      concept: '💡',
+      process: '⚙️',
+      example: '📝',
+      analogy: '🔄',
+    };
+    const emoji = typeEmoji[node.nodeType] || '•';
+
+    lines.push(`${indent}- ${emoji} **${node.label}**`);
+    if (node.description) {
+      lines.push(`${indent}  ${node.description}`);
+    }
+
+    const children = childrenMap.get(node.id) || [];
+    for (const child of children) {
+      renderNode(child, indent + '  ');
+    }
+  }
+
+  for (const root of rootNodes) {
+    renderNode(root);
+    lines.push('');
+  }
+
+  if (model.edges.length > 0) {
+    lines.push('## Relationships');
+    lines.push('');
+    for (const edge of model.edges) {
+      const source = nodeMap.get(edge.source);
+      const target = nodeMap.get(edge.target);
+      if (source && target) {
+        lines.push(`- **${source.label}** → *${edge.label}* → **${target.label}**`);
+      }
+    }
+    lines.push('');
+  }
+
+  if (model.analogies.length > 0) {
+    lines.push('## Real-World Analogies');
+    lines.push('');
+    for (const analogy of model.analogies) {
+      lines.push(`### ${analogy.concept} ↔ ${analogy.realWorldExample}`);
+      lines.push('');
+      lines.push(analogy.explanation);
+      lines.push('');
+    }
+  }
+
+  lines.push('---');
+  lines.push(`*Generated on ${new Date().toISOString().split('T')[0]}*`);
+
+  return lines.join('\n');
+}
+
+{
+  const testModel: MentalModel = {
+    title: 'Test Mental Model',
+    summary: 'A test summary',
+    diagramType: 'mindmap',
+    nodes: [
+      { id: 'n1', label: 'Root Node', description: 'The root', depth: 0, nodeType: 'concept', parentId: null },
+      { id: 'n2', label: 'Child Node', description: 'A child', depth: 1, nodeType: 'process', parentId: 'n1' },
+    ],
+    edges: [
+      { id: 'e1', source: 'n1', target: 'n2', label: 'contains', edgeType: 'contains' },
+    ],
+    analogies: [
+      { concept: 'Tree', realWorldExample: 'Family tree', explanation: 'Like a family tree' },
+    ],
+  };
+
+  const markdown = formatMentalModelAsMarkdown(testModel);
+
+  assertContains(markdown, '# Test Mental Model', 'Should have title as heading');
+  assertContains(markdown, '> A test summary', 'Should have summary as blockquote');
+  assertContains(markdown, '**Diagram Type:** mindmap', 'Should include diagram type');
+  assertContains(markdown, '## Concepts', 'Should have Concepts section');
+  assertContains(markdown, '💡 **Root Node**', 'Should render concept nodes with emoji');
+  assertContains(markdown, '⚙️ **Child Node**', 'Should render process nodes with emoji');
+  assertContains(markdown, '## Relationships', 'Should have Relationships section');
+  assertContains(markdown, '**Root Node** → *contains* → **Child Node**', 'Should format edges');
+  assertContains(markdown, '## Real-World Analogies', 'Should have Analogies section');
+  assertContains(markdown, '### Tree ↔ Family tree', 'Should format analogies');
+  assertContains(markdown, '---', 'Should have footer separator');
+}
+
+{
+  const emptyModel: MentalModel = {
+    title: 'Empty Model',
+    summary: 'No content',
+    diagramType: 'flowchart',
+    nodes: [],
+    edges: [],
+    analogies: [],
+  };
+
+  const markdown = formatMentalModelAsMarkdown(emptyModel);
+
+  assertContains(markdown, '# Empty Model', 'Should handle empty model');
+  assertNotContains(markdown, '## Relationships', 'Should not have Relationships section when empty');
+  assertNotContains(markdown, '## Real-World Analogies', 'Should not have Analogies section when empty');
+}
+
 // Summary
 console.log('\n=== Test Summary ===');
 console.log(`Passed: ${passed}`);
