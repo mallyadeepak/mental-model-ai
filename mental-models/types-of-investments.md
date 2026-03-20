@@ -11,8 +11,8 @@ flowchart TB
   classDef example fill:#5DAE8B,stroke:#3D7A5E,stroke-width:2px,color:#fff
   classDef analogy fill:#D4A574,stroke:#A67B4A,stroke-width:2px,color:#fff
   n1(Investment)
-  n2(Stocks (Equities))
-  n3(Bonds (Fixed Income))
+  n2("Stocks (Equities)")
+  n3("Bonds (Fixed Income)")
   n4(Index Funds and ETFs)
   n5(Commodities)
   n6(Real Estate)
