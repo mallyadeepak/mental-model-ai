@@ -287,6 +287,64 @@ interface MentalModel {
   analogies: MentalModelAnalogy[];
 }
 
+function generateMermaidDiagram(model: MentalModel): string {
+  const lines: string[] = [];
+  const nodeMap = new Map(model.nodes.map((n) => [n.id, n]));
+
+  if (model.diagramType === 'mindmap') {
+    lines.push('mindmap');
+    const rootNodes = model.nodes.filter((n) => !n.parentId || n.parentId === null);
+    const childrenMap = new Map<string, MentalModelNode[]>();
+
+    for (const node of model.nodes) {
+      if (node.parentId) {
+        const children = childrenMap.get(node.parentId) || [];
+        children.push(node);
+        childrenMap.set(node.parentId, children);
+      }
+    }
+
+    function renderMindmapNode(node: MentalModelNode, depth: number): void {
+      const indent = '  '.repeat(depth);
+      const shape = node.nodeType === 'concept' ? `(${node.label})` :
+                    node.nodeType === 'process' ? `[${node.label}]` :
+                    node.nodeType === 'example' ? `)${node.label}(` :
+                    `{{${node.label}}}`;
+      lines.push(`${indent}${shape}`);
+      const children = childrenMap.get(node.id) || [];
+      for (const child of children) {
+        renderMindmapNode(child, depth + 1);
+      }
+    }
+
+    for (const root of rootNodes) {
+      renderMindmapNode(root, 1);
+    }
+  } else {
+    lines.push('flowchart TD');
+    for (const node of model.nodes) {
+      const shape = node.nodeType === 'concept' ? `${node.id}((${node.label}))` :
+                    node.nodeType === 'process' ? `${node.id}[${node.label}]` :
+                    node.nodeType === 'example' ? `${node.id}[/${node.label}/]` :
+                    `${node.id}{${node.label}}`;
+      lines.push(`  ${shape}`);
+    }
+    for (const edge of model.edges) {
+      const source = nodeMap.get(edge.source);
+      const target = nodeMap.get(edge.target);
+      if (source && target) {
+        const arrow = edge.edgeType === 'contains' ? '-->' :
+                      edge.edgeType === 'leads_to' ? '==>' :
+                      edge.edgeType === 'depends_on' ? '-.->' :
+                      '---';
+        lines.push(`  ${edge.source} ${arrow}|${edge.label}| ${edge.target}`);
+      }
+    }
+  }
+
+  return lines.join('\n');
+}
+
 function formatMentalModelAsMarkdown(model: MentalModel): string {
   const lines: string[] = [];
 
@@ -294,7 +352,13 @@ function formatMentalModelAsMarkdown(model: MentalModel): string {
   lines.push('');
   lines.push(`> ${model.summary}`);
   lines.push('');
-  lines.push(`**Diagram Type:** ${model.diagramType}`);
+
+  // Mermaid diagram
+  lines.push('## Diagram');
+  lines.push('');
+  lines.push('```mermaid');
+  lines.push(generateMermaidDiagram(model));
+  lines.push('```');
   lines.push('');
 
   const nodeMap = new Map(model.nodes.map((n) => [n.id, n]));
@@ -388,7 +452,11 @@ function formatMentalModelAsMarkdown(model: MentalModel): string {
 
   assertContains(markdown, '# Test Mental Model', 'Should have title as heading');
   assertContains(markdown, '> A test summary', 'Should have summary as blockquote');
-  assertContains(markdown, '**Diagram Type:** mindmap', 'Should include diagram type');
+  assertContains(markdown, '## Diagram', 'Should have Diagram section');
+  assertContains(markdown, '```mermaid', 'Should have Mermaid code block');
+  assertContains(markdown, 'mindmap', 'Should include mindmap diagram type');
+  assertContains(markdown, '(Root Node)', 'Should render concept nodes in Mermaid');
+  assertContains(markdown, '[Child Node]', 'Should render process nodes in Mermaid');
   assertContains(markdown, '## Concepts', 'Should have Concepts section');
   assertContains(markdown, '💡 **Root Node**', 'Should render concept nodes with emoji');
   assertContains(markdown, '⚙️ **Child Node**', 'Should render process nodes with emoji');
@@ -412,6 +480,8 @@ function formatMentalModelAsMarkdown(model: MentalModel): string {
   const markdown = formatMentalModelAsMarkdown(emptyModel);
 
   assertContains(markdown, '# Empty Model', 'Should handle empty model');
+  assertContains(markdown, '```mermaid', 'Should have Mermaid block even when empty');
+  assertContains(markdown, 'flowchart TD', 'Should use flowchart for non-mindmap types');
   assertNotContains(markdown, '## Relationships', 'Should not have Relationships section when empty');
   assertNotContains(markdown, '## Real-World Analogies', 'Should not have Analogies section when empty');
 }

@@ -46,6 +46,70 @@ interface MentalModel {
   analogies: MentalModelAnalogy[];
 }
 
+function generateMermaidDiagram(model: MentalModel): string {
+  const lines: string[] = [];
+  const nodeMap = new Map(model.nodes.map((n) => [n.id, n]));
+
+  if (model.diagramType === 'mindmap') {
+    lines.push('mindmap');
+    const rootNodes = model.nodes.filter((n) => !n.parentId || n.parentId === null);
+    const childrenMap = new Map<string, MentalModelNode[]>();
+
+    for (const node of model.nodes) {
+      if (node.parentId) {
+        const children = childrenMap.get(node.parentId) || [];
+        children.push(node);
+        childrenMap.set(node.parentId, children);
+      }
+    }
+
+    function renderMindmapNode(node: MentalModelNode, depth: number): void {
+      const indent = '  '.repeat(depth);
+      // Use different shapes based on node type
+      const shape = node.nodeType === 'concept' ? `(${node.label})` :
+                    node.nodeType === 'process' ? `[${node.label}]` :
+                    node.nodeType === 'example' ? `)${node.label}(` :
+                    `{{${node.label}}}`;
+      lines.push(`${indent}${shape}`);
+      const children = childrenMap.get(node.id) || [];
+      for (const child of children) {
+        renderMindmapNode(child, depth + 1);
+      }
+    }
+
+    for (const root of rootNodes) {
+      renderMindmapNode(root, 1);
+    }
+  } else {
+    // Flowchart for both flowchart and conceptmap
+    lines.push('flowchart TD');
+
+    // Define nodes with shapes based on type
+    for (const node of model.nodes) {
+      const shape = node.nodeType === 'concept' ? `${node.id}((${node.label}))` :
+                    node.nodeType === 'process' ? `${node.id}[${node.label}]` :
+                    node.nodeType === 'example' ? `${node.id}[/${node.label}/]` :
+                    `${node.id}{${node.label}}`;
+      lines.push(`  ${shape}`);
+    }
+
+    // Define edges
+    for (const edge of model.edges) {
+      const source = nodeMap.get(edge.source);
+      const target = nodeMap.get(edge.target);
+      if (source && target) {
+        const arrow = edge.edgeType === 'contains' ? '-->' :
+                      edge.edgeType === 'leads_to' ? '==>' :
+                      edge.edgeType === 'depends_on' ? '-.->' :
+                      '---';
+        lines.push(`  ${edge.source} ${arrow}|${edge.label}| ${edge.target}`);
+      }
+    }
+  }
+
+  return lines.join('\n');
+}
+
 function formatMentalModelAsMarkdown(model: MentalModel): string {
   const lines: string[] = [];
 
@@ -54,10 +118,16 @@ function formatMentalModelAsMarkdown(model: MentalModel): string {
   lines.push('');
   lines.push(`> ${model.summary}`);
   lines.push('');
-  lines.push(`**Diagram Type:** ${model.diagramType}`);
+
+  // Mermaid diagram
+  lines.push('## Diagram');
+  lines.push('');
+  lines.push('```mermaid');
+  lines.push(generateMermaidDiagram(model));
+  lines.push('```');
   lines.push('');
 
-  // Build node hierarchy
+  // Build node hierarchy for text representation
   const nodeMap = new Map(model.nodes.map((n) => [n.id, n]));
   const rootNodes = model.nodes.filter((n) => !n.parentId || n.parentId === null);
   const childrenMap = new Map<string, MentalModelNode[]>();
@@ -70,7 +140,7 @@ function formatMentalModelAsMarkdown(model: MentalModel): string {
     }
   }
 
-  // Render nodes hierarchically
+  // Render nodes hierarchically as text
   lines.push('## Concepts');
   lines.push('');
 
@@ -99,7 +169,7 @@ function formatMentalModelAsMarkdown(model: MentalModel): string {
     lines.push('');
   }
 
-  // Relationships
+  // Relationships (text version)
   if (model.edges.length > 0) {
     lines.push('## Relationships');
     lines.push('');
