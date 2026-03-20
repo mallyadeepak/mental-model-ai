@@ -1,27 +1,41 @@
 # Git Version Control
 
-> Git is a distributed version control system that tracks changes to files.
+> Git is a distributed version control system.
 
-**Diagram Type:** mindmap
+## Diagram
+
+```mermaid
+mindmap
+  (Git)
+    (Commits)
+      [Staging]
+    (Branches)
+      [Merge]
+```
 
 ## Concepts
 
 - 💡 **Git**
-  Distributed version control
+  Distributed VCS
   - 💡 **Commits**
     Snapshots of code
+    - ⚙️ **Staging**
+      Prepare changes
   - 💡 **Branches**
-    Parallel development lines
+    Parallel development
+    - ⚙️ **Merge**
+      Combine branches
 
 ## Relationships
 
 - **Git** → *contains* → **Commits**
+- **Git** → *contains* → **Branches**
 
 ## Real-World Analogies
 
-### Commits ↔ Save points in a game
+### Commits ↔ Save points
 
-Like game saves, commits let you restore previous states
+Like game saves
 
 ---
 *Generated on 2026-03-20*
