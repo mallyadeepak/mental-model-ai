@@ -50,87 +50,57 @@ function generateMermaidDiagram(model: MentalModel): string {
   const lines: string[] = [];
   const nodeMap = new Map(model.nodes.map((n) => [n.id, n]));
 
-  if (model.diagramType === 'mindmap') {
-    lines.push('mindmap');
-    lines.push('  root((🧠 ' + model.title + '))');
+  // Use flowchart for all types - better visual control
+  lines.push('flowchart TB');
 
-    const rootNodes = model.nodes.filter((n) => !n.parentId || n.parentId === null);
-    const childrenMap = new Map<string, MentalModelNode[]>();
+  // Clean, professional color scheme
+  lines.push('  classDef concept fill:#4A90A4,stroke:#2C5F6E,stroke-width:2px,color:#fff');
+  lines.push('  classDef process fill:#7B68A6,stroke:#4A3D6E,stroke-width:2px,color:#fff');
+  lines.push('  classDef example fill:#5DAE8B,stroke:#3D7A5E,stroke-width:2px,color:#fff');
+  lines.push('  classDef analogy fill:#D4A574,stroke:#A67B4A,stroke-width:2px,color:#fff');
 
-    for (const node of model.nodes) {
-      if (node.parentId) {
-        const children = childrenMap.get(node.parentId) || [];
-        children.push(node);
-        childrenMap.set(node.parentId, children);
-      }
-    }
+  // Define nodes with distinct shapes per type (no emojis)
+  for (const node of model.nodes) {
+    // Different shapes: concept=rounded rect, process=rect, example=parallelogram, analogy=hexagon
+    const shape = node.nodeType === 'concept' ? `${node.id}(${node.label})` :
+                  node.nodeType === 'process' ? `${node.id}[${node.label}]` :
+                  node.nodeType === 'example' ? `${node.id}[/${node.label}/]` :
+                  `${node.id}{{${node.label}}}`;
+    lines.push(`  ${shape}`);
+  }
 
-    function renderMindmapNode(node: MentalModelNode, depth: number): void {
-      const indent = '  '.repeat(depth + 1);
-      // Use emojis and different shapes based on node type
-      const emoji = node.nodeType === 'concept' ? '💡' :
-                    node.nodeType === 'process' ? '⚙️' :
-                    node.nodeType === 'example' ? '📝' : '🔄';
-      const shape = node.nodeType === 'concept' ? `(${emoji} ${node.label})` :
-                    node.nodeType === 'process' ? `[${emoji} ${node.label}]` :
-                    node.nodeType === 'example' ? `)${emoji} ${node.label}(` :
-                    `{{${emoji} ${node.label}}}`;
-      lines.push(`${indent}${shape}`);
-      const children = childrenMap.get(node.id) || [];
-      for (const child of children) {
-        renderMindmapNode(child, depth + 1);
-      }
-    }
+  // Apply styles to nodes
+  const conceptNodes = model.nodes.filter(n => n.nodeType === 'concept').map(n => n.id);
+  const processNodes = model.nodes.filter(n => n.nodeType === 'process').map(n => n.id);
+  const exampleNodes = model.nodes.filter(n => n.nodeType === 'example').map(n => n.id);
+  const analogyNodes = model.nodes.filter(n => n.nodeType === 'analogy').map(n => n.id);
 
-    for (const root of rootNodes) {
-      renderMindmapNode(root, 1);
-    }
-  } else {
-    // Flowchart for both flowchart and conceptmap
-    lines.push('flowchart TD');
+  if (conceptNodes.length) lines.push(`  class ${conceptNodes.join(',')} concept`);
+  if (processNodes.length) lines.push(`  class ${processNodes.join(',')} process`);
+  if (exampleNodes.length) lines.push(`  class ${exampleNodes.join(',')} example`);
+  if (analogyNodes.length) lines.push(`  class ${analogyNodes.join(',')} analogy`);
 
-    // Add styling classes
-    lines.push('  classDef concept fill:#e1f5fe,stroke:#01579b,stroke-width:2px,color:#01579b');
-    lines.push('  classDef process fill:#fff3e0,stroke:#e65100,stroke-width:2px,color:#e65100');
-    lines.push('  classDef example fill:#e8f5e9,stroke:#2e7d32,stroke-width:2px,color:#2e7d32');
-    lines.push('  classDef analogy fill:#fce4ec,stroke:#c2185b,stroke-width:2px,color:#c2185b');
-
-    // Define nodes with shapes based on type
-    for (const node of model.nodes) {
-      const emoji = node.nodeType === 'concept' ? '💡' :
-                    node.nodeType === 'process' ? '⚙️' :
-                    node.nodeType === 'example' ? '📝' : '🔄';
-      const shape = node.nodeType === 'concept' ? `${node.id}((${emoji} ${node.label}))` :
-                    node.nodeType === 'process' ? `${node.id}[${emoji} ${node.label}]` :
-                    node.nodeType === 'example' ? `${node.id}[/${emoji} ${node.label}/]` :
-                    `${node.id}{${emoji} ${node.label}}`;
-      lines.push(`  ${shape}`);
-    }
-
-    // Apply styles to nodes
-    const conceptNodes = model.nodes.filter(n => n.nodeType === 'concept').map(n => n.id);
-    const processNodes = model.nodes.filter(n => n.nodeType === 'process').map(n => n.id);
-    const exampleNodes = model.nodes.filter(n => n.nodeType === 'example').map(n => n.id);
-    const analogyNodes = model.nodes.filter(n => n.nodeType === 'analogy').map(n => n.id);
-
-    if (conceptNodes.length) lines.push(`  class ${conceptNodes.join(',')} concept`);
-    if (processNodes.length) lines.push(`  class ${processNodes.join(',')} process`);
-    if (exampleNodes.length) lines.push(`  class ${exampleNodes.join(',')} example`);
-    if (analogyNodes.length) lines.push(`  class ${analogyNodes.join(',')} analogy`);
-
-    // Define edges with styling
-    for (const edge of model.edges) {
-      const source = nodeMap.get(edge.source);
-      const target = nodeMap.get(edge.target);
-      if (source && target) {
-        const arrow = edge.edgeType === 'contains' ? '-->' :
-                      edge.edgeType === 'leads_to' ? '==>' :
-                      edge.edgeType === 'depends_on' ? '-.->' :
-                      '---';
-        lines.push(`  ${edge.source} ${arrow}|${edge.label}| ${edge.target}`);
-      }
+  // Define edges
+  for (const edge of model.edges) {
+    const source = nodeMap.get(edge.source);
+    const target = nodeMap.get(edge.target);
+    if (source && target) {
+      const arrow = edge.edgeType === 'contains' ? '-->' :
+                    edge.edgeType === 'leads_to' ? '==>' :
+                    edge.edgeType === 'depends_on' ? '-.->' :
+                    '---';
+      lines.push(`  ${edge.source} ${arrow}|${edge.label}| ${edge.target}`);
     }
   }
+
+  // Add legend
+  lines.push('');
+  lines.push('  subgraph Legend');
+  lines.push('    L1(Concept):::concept');
+  lines.push('    L2[Process]:::process');
+  lines.push('    L3[/Example/]:::example');
+  lines.push('    L4{{Analogy}}:::analogy');
+  lines.push('  end');
 
   return lines.join('\n');
 }
@@ -170,17 +140,17 @@ function formatMentalModelAsMarkdown(model: MentalModel): string {
   lines.push('');
 
   function renderNode(node: MentalModelNode, indent: string = ''): void {
-    const typeEmoji: Record<string, string> = {
-      concept: '💡',
-      process: '⚙️',
-      example: '📝',
-      analogy: '🔄',
+    const typeLabel: Record<string, string> = {
+      concept: '[Concept]',
+      process: '[Process]',
+      example: '[Example]',
+      analogy: '[Analogy]',
     };
-    const emoji = typeEmoji[node.nodeType] || '•';
+    const label = typeLabel[node.nodeType] || '';
 
-    lines.push(`${indent}- ${emoji} **${node.label}**`);
+    lines.push(`${indent}- **${node.label}** ${label}`);
     if (node.description) {
-      lines.push(`${indent}  ${node.description}`);
+      lines.push(`${indent}  _${node.description}_`);
     }
 
     const children = childrenMap.get(node.id) || [];
@@ -305,17 +275,18 @@ server.setRequestHandler(ListToolsRequestSchema, async () => {
         },
       },
       {
-        name: 'save_mental_model',
-        description: 'Save a generated mental model as a readable markdown file. Optionally commit it to the git repository. Returns the formatted markdown content.',
+        name: 'format_mental_model',
+        description: 'Format a mental model as readable markdown with a visual diagram. By default only returns the formatted content for preview. Use save=true to write to file, and commit=true to also commit to git.',
         inputSchema: {
           type: 'object',
           properties: {
-            content: { type: 'string', description: 'The mental model JSON content to save' },
-            filename: { type: 'string', description: 'Filename for the mental model (e.g., "react-hooks"). Will be saved as a .md file in mental-models/ directory.' },
-            commit: { type: 'boolean', default: false, description: 'If true, also commit the file to the git repository. Default is false (save only).' },
+            content: { type: 'string', description: 'The mental model JSON content to format' },
+            filename: { type: 'string', description: 'Filename for the mental model (e.g., "react-hooks"). Required if save=true.' },
+            save: { type: 'boolean', default: false, description: 'If true, save to mental-models/ directory. Default is false (preview only).' },
+            commit: { type: 'boolean', default: false, description: 'If true, also commit the file to git. Requires save=true.' },
             commitMessage: { type: 'string', description: 'Custom commit message (only used if commit is true).' },
           },
-          required: ['content', 'filename'],
+          required: ['content'],
         },
       },
     ],
@@ -424,15 +395,53 @@ Output: ${MENTAL_MODEL_SCHEMA}`;
       };
     }
 
-    case 'save_mental_model': {
-      const { content, filename, commit = false, commitMessage } = args as {
+    case 'format_mental_model': {
+      const { content, filename, save = false, commit = false, commitMessage } = args as {
         content: string;
-        filename: string;
+        filename?: string;
+        save?: boolean;
         commit?: boolean;
         commitMessage?: string;
       };
 
       try {
+        // Convert JSON to readable markdown
+        let markdownContent: string;
+        let modelTitle = 'Mental Model';
+        try {
+          const model = JSON.parse(content);
+          modelTitle = model.title || modelTitle;
+          markdownContent = formatMentalModelAsMarkdown(model);
+        } catch {
+          // If it's not valid JSON, format as-is in a code block
+          markdownContent = `# Mental Model\n\n\`\`\`json\n${content}\n\`\`\``;
+        }
+
+        // If save is false, just return the preview
+        if (!save) {
+          return {
+            content: [
+              {
+                type: 'text',
+                text: `**Preview** (not saved yet)\n\n---\n\n${markdownContent}`,
+              },
+            ],
+          };
+        }
+
+        // Save requires filename
+        if (!filename) {
+          return {
+            content: [
+              {
+                type: 'text',
+                text: 'Error: filename is required when save=true',
+              },
+            ],
+            isError: true,
+          };
+        }
+
         // Get the git repository root
         const { stdout: gitRoot } = await execAsync('git rev-parse --show-toplevel');
         const repoRoot = gitRoot.trim();
@@ -446,31 +455,20 @@ Output: ${MENTAL_MODEL_SCHEMA}`;
         const finalFilename = `${sanitizedFilename}.md`;
         const filePath = join(outputDir, finalFilename);
 
-        // Convert JSON to readable markdown
-        let markdownContent: string;
-        try {
-          const model = JSON.parse(content);
-          markdownContent = formatMentalModelAsMarkdown(model);
-        } catch {
-          // If it's not valid JSON, save as-is in a code block
-          markdownContent = `# Mental Model\n\n\`\`\`json\n${content}\n\`\`\``;
-        }
-
         // Write the file
         await writeFile(filePath, markdownContent, 'utf-8');
 
         const relativePath = `mental-models/${finalFilename}`;
-        let statusMessage = `Saved to: ${relativePath}`;
+        let statusMessage = `**Saved to:** ${relativePath}`;
 
         // Optionally commit
         if (commit) {
           await execAsync(`git add "${relativePath}"`, { cwd: repoRoot });
           const message = commitMessage || `Add mental model: ${sanitizedFilename}`;
           await execAsync(`git commit -m "${message}"`, { cwd: repoRoot });
-          statusMessage += `\nCommitted with message: ${message}`;
+          statusMessage += `\n**Committed:** ${message}`;
         }
 
-        // Always return the markdown content so user can see it
         return {
           content: [
             {
@@ -485,7 +483,7 @@ Output: ${MENTAL_MODEL_SCHEMA}`;
           content: [
             {
               type: 'text',
-              text: `Failed to save mental model: ${errorMessage}`,
+              text: `Failed to format mental model: ${errorMessage}`,
             },
           ],
           isError: true,

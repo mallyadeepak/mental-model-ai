@@ -98,8 +98,8 @@ async function runTests() {
       'Should have explain_relationship tool'
     );
     assert(
-      toolNames.includes('save_mental_model'),
-      'Should have save_mental_model tool'
+      toolNames.includes('format_mental_model'),
+      'Should have format_mental_model tool'
     );
 
     // Test 3: Call explain_concept tool
@@ -198,7 +198,7 @@ async function runTests() {
       'explain_relationship should include question'
     );
 
-    // Test 7: Call save_mental_model tool (will fail due to no git repo, but should not crash)
+    // Test 7: Call format_mental_model tool (will fail due to no git repo, but should not crash)
     const sampleModel = JSON.stringify({
       title: 'Test Model',
       summary: 'A test mental model',
@@ -221,7 +221,7 @@ async function runTests() {
       id: 7,
       method: 'tools/call',
       params: {
-        name: 'save_mental_model',
+        name: 'format_mental_model',
         arguments: {
           content: sampleModel,
           filename: 'test-model',
@@ -230,11 +230,11 @@ async function runTests() {
     })) as { result?: { content: Array<{ text: string }>; isError?: boolean } };
 
     const commitText = commitResponse?.result?.content?.[0]?.text || '';
-    // The tool should return either success (with content) or a git-related error (not crash)
+    // The tool should return preview content (default is save=false)
     assert(
-      commitText.includes('Saved to:') ||
-        commitText.includes('Failed to save'),
-      'save_mental_model should return saved file path or error'
+      commitText.includes('Preview') ||
+        commitText.includes('Failed to format'),
+      'format_mental_model should return preview or error'
     );
 
     // Test 8: Unknown tool should return error
