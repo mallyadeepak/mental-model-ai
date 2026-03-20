@@ -6,7 +6,8 @@
 
 ```mermaid
 mindmap
-  (Root)
+  root((🧠 Test Model))
+    (💡 Root)
 ```
 
 ## Concepts

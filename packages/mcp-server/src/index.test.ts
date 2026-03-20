@@ -252,7 +252,7 @@ console.log('\n--- Token efficiency tests ---');
 }
 
 // Test 7: Markdown formatting
-console.log('\n--- commit_mental_model markdown tests ---');
+console.log('\n--- save_mental_model markdown tests ---');
 
 interface MentalModelNode {
   id: string;
@@ -293,6 +293,8 @@ function generateMermaidDiagram(model: MentalModel): string {
 
   if (model.diagramType === 'mindmap') {
     lines.push('mindmap');
+    lines.push('  root((🧠 ' + model.title + '))');
+
     const rootNodes = model.nodes.filter((n) => !n.parentId || n.parentId === null);
     const childrenMap = new Map<string, MentalModelNode[]>();
 
@@ -305,11 +307,14 @@ function generateMermaidDiagram(model: MentalModel): string {
     }
 
     function renderMindmapNode(node: MentalModelNode, depth: number): void {
-      const indent = '  '.repeat(depth);
-      const shape = node.nodeType === 'concept' ? `(${node.label})` :
-                    node.nodeType === 'process' ? `[${node.label}]` :
-                    node.nodeType === 'example' ? `)${node.label}(` :
-                    `{{${node.label}}}`;
+      const indent = '  '.repeat(depth + 1);
+      const emoji = node.nodeType === 'concept' ? '💡' :
+                    node.nodeType === 'process' ? '⚙️' :
+                    node.nodeType === 'example' ? '📝' : '🔄';
+      const shape = node.nodeType === 'concept' ? `(${emoji} ${node.label})` :
+                    node.nodeType === 'process' ? `[${emoji} ${node.label}]` :
+                    node.nodeType === 'example' ? `)${emoji} ${node.label}(` :
+                    `{{${emoji} ${node.label}}}`;
       lines.push(`${indent}${shape}`);
       const children = childrenMap.get(node.id) || [];
       for (const child of children) {
@@ -322,13 +327,32 @@ function generateMermaidDiagram(model: MentalModel): string {
     }
   } else {
     lines.push('flowchart TD');
+    lines.push('  classDef concept fill:#e1f5fe,stroke:#01579b,stroke-width:2px,color:#01579b');
+    lines.push('  classDef process fill:#fff3e0,stroke:#e65100,stroke-width:2px,color:#e65100');
+    lines.push('  classDef example fill:#e8f5e9,stroke:#2e7d32,stroke-width:2px,color:#2e7d32');
+    lines.push('  classDef analogy fill:#fce4ec,stroke:#c2185b,stroke-width:2px,color:#c2185b');
+
     for (const node of model.nodes) {
-      const shape = node.nodeType === 'concept' ? `${node.id}((${node.label}))` :
-                    node.nodeType === 'process' ? `${node.id}[${node.label}]` :
-                    node.nodeType === 'example' ? `${node.id}[/${node.label}/]` :
-                    `${node.id}{${node.label}}`;
+      const emoji = node.nodeType === 'concept' ? '💡' :
+                    node.nodeType === 'process' ? '⚙️' :
+                    node.nodeType === 'example' ? '📝' : '🔄';
+      const shape = node.nodeType === 'concept' ? `${node.id}((${emoji} ${node.label}))` :
+                    node.nodeType === 'process' ? `${node.id}[${emoji} ${node.label}]` :
+                    node.nodeType === 'example' ? `${node.id}[/${emoji} ${node.label}/]` :
+                    `${node.id}{${emoji} ${node.label}}`;
       lines.push(`  ${shape}`);
     }
+
+    const conceptNodes = model.nodes.filter(n => n.nodeType === 'concept').map(n => n.id);
+    const processNodes = model.nodes.filter(n => n.nodeType === 'process').map(n => n.id);
+    const exampleNodes = model.nodes.filter(n => n.nodeType === 'example').map(n => n.id);
+    const analogyNodes = model.nodes.filter(n => n.nodeType === 'analogy').map(n => n.id);
+
+    if (conceptNodes.length) lines.push(`  class ${conceptNodes.join(',')} concept`);
+    if (processNodes.length) lines.push(`  class ${processNodes.join(',')} process`);
+    if (exampleNodes.length) lines.push(`  class ${exampleNodes.join(',')} example`);
+    if (analogyNodes.length) lines.push(`  class ${analogyNodes.join(',')} analogy`);
+
     for (const edge of model.edges) {
       const source = nodeMap.get(edge.source);
       const target = nodeMap.get(edge.target);
@@ -455,8 +479,8 @@ function formatMentalModelAsMarkdown(model: MentalModel): string {
   assertContains(markdown, '## Diagram', 'Should have Diagram section');
   assertContains(markdown, '```mermaid', 'Should have Mermaid code block');
   assertContains(markdown, 'mindmap', 'Should include mindmap diagram type');
-  assertContains(markdown, '(Root Node)', 'Should render concept nodes in Mermaid');
-  assertContains(markdown, '[Child Node]', 'Should render process nodes in Mermaid');
+  assertContains(markdown, '(💡 Root Node)', 'Should render concept nodes in Mermaid with emoji');
+  assertContains(markdown, '[⚙️ Child Node]', 'Should render process nodes in Mermaid with emoji');
   assertContains(markdown, '## Concepts', 'Should have Concepts section');
   assertContains(markdown, '💡 **Root Node**', 'Should render concept nodes with emoji');
   assertContains(markdown, '⚙️ **Child Node**', 'Should render process nodes with emoji');
