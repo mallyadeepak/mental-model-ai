@@ -7,7 +7,7 @@ import {
   ListToolsRequestSchema,
 } from '@modelcontextprotocol/sdk/types.js';
 import { exec } from 'child_process';
-import { mkdir, writeFile } from 'fs/promises';
+import { mkdir, readFile, writeFile } from 'fs/promises';
 import { join } from 'path';
 import { promisify } from 'util';
 
@@ -49,6 +49,10 @@ interface MentalModel {
 function sanitizeLabel(label: string): string {
   // Replace double quotes with single quotes to avoid breaking quoted Mermaid labels
   return label.replace(/"/g, "'");
+}
+
+function removeEmDashes(text: string): string {
+  return text.replace(/\u2014/g, '-');
 }
 
 function generateMermaidDiagram(model: MentalModel): string {
@@ -117,9 +121,9 @@ function formatMentalModelAsMarkdown(model: MentalModel): string {
   const lines: string[] = [];
 
   // Title and summary
-  lines.push(`# ${model.title}`);
+  lines.push(`# ${removeEmDashes(model.title)}`);
   lines.push('');
-  lines.push(`> ${model.summary}`);
+  lines.push(`> ${removeEmDashes(model.summary)}`);
   lines.push('');
 
   // Mermaid diagram
@@ -156,9 +160,9 @@ function formatMentalModelAsMarkdown(model: MentalModel): string {
     };
     const label = typeLabel[node.nodeType] || '';
 
-    lines.push(`${indent}- **${node.label}** ${label}`);
+    lines.push(`${indent}- **${removeEmDashes(node.label)}** ${label}`);
     if (node.description) {
-      lines.push(`${indent}  _${node.description}_`);
+      lines.push(`${indent}  _${removeEmDashes(node.description)}_`);
     }
 
     const children = childrenMap.get(node.id) || [];
@@ -191,9 +195,9 @@ function formatMentalModelAsMarkdown(model: MentalModel): string {
     lines.push('## Real-World Analogies');
     lines.push('');
     for (const analogy of model.analogies) {
-      lines.push(`### ${analogy.concept} ↔ ${analogy.realWorldExample}`);
+      lines.push(`### ${removeEmDashes(analogy.concept)} ↔ ${removeEmDashes(analogy.realWorldExample)}`);
       lines.push('');
-      lines.push(analogy.explanation);
+      lines.push(removeEmDashes(analogy.explanation));
       lines.push('');
     }
   }
@@ -280,6 +284,20 @@ server.setRequestHandler(ListToolsRequestSchema, async () => {
             question: { type: 'string', description: 'Specific question about the relationship' },
           },
           required: ['components'],
+        },
+      },
+      {
+        name: 'publish_to_devto',
+        description: 'Publish a saved mental model to dev.to as a well-formatted article. Reads the markdown file from mental-models/ directory and publishes via the dev.to API.',
+        inputSchema: {
+          type: 'object',
+          properties: {
+            filename: { type: 'string', description: 'Filename of the saved mental model (e.g., "large-language-models"), without extension' },
+            tags: { type: 'array', items: { type: 'string' }, description: 'Up to 4 tags for the dev.to post (e.g., ["ai", "machinelearning"])' },
+            published: { type: 'boolean', default: false, description: 'If true, publish immediately. If false (default), save as draft.' },
+            canonicalUrl: { type: 'string', description: 'Optional canonical URL if this content was originally published elsewhere' },
+          },
+          required: ['filename'],
         },
       },
       {
@@ -494,6 +512,96 @@ Output: ${MENTAL_MODEL_SCHEMA}`;
               text: `Failed to format mental model: ${errorMessage}`,
             },
           ],
+          isError: true,
+        };
+      }
+    }
+
+    case 'publish_to_devto': {
+      const { filename, tags = [], published = false, canonicalUrl } = args as {
+        filename: string;
+        tags?: string[];
+        published?: boolean;
+        canonicalUrl?: string;
+      };
+
+      try {
+        const apiKey = process.env.DEVTO_API_KEY;
+        if (!apiKey) {
+          return {
+            content: [{ type: 'text', text: 'Error: DEVTO_API_KEY environment variable is not set. Get your API key from https://dev.to/settings/extensions under "DEV Community API Keys".' }],
+            isError: true,
+          };
+        }
+
+        // Read the saved mental model file
+        const { stdout: gitRoot } = await execAsync('git rev-parse --show-toplevel');
+        const repoRoot = gitRoot.trim();
+        const sanitizedFilename = filename.replace(/[^a-zA-Z0-9-_\.]/g, '-').replace(/\.(json|md)$/, '');
+        const filePath = join(repoRoot, 'mental-models', `${sanitizedFilename}.md`);
+
+        let markdownContent: string;
+        try {
+          markdownContent = await readFile(filePath, 'utf-8');
+        } catch {
+          return {
+            content: [{ type: 'text', text: `Error: Could not read file mental-models/${sanitizedFilename}.md — have you saved the mental model yet?` }],
+            isError: true,
+          };
+        }
+
+        // Extract title from the first H1 in the markdown
+        const titleMatch = markdownContent.match(/^#\s+(.+)$/m);
+        const title = titleMatch ? titleMatch[1] : sanitizedFilename;
+
+        // Convert Mermaid code blocks to mermaid.ink image URLs (more reliable on dev.to)
+        const devtoContent = markdownContent.replace(
+          /```mermaid\n([\s\S]*?)```/g,
+          (_match, diagram) => {
+            const encoded = Buffer.from(diagram.trim()).toString('base64url');
+            return `![diagram](https://mermaid.ink/img/${encoded})`;
+          }
+        );
+
+        // Publish to dev.to
+        const postRes = await fetch('https://dev.to/api/articles', {
+          method: 'POST',
+          headers: {
+            'api-key': apiKey,
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            article: {
+              title,
+              body_markdown: devtoContent,
+              tags: tags.slice(0, 4),
+              published,
+              ...(canonicalUrl ? { canonical_url: canonicalUrl } : {}),
+            },
+          }),
+        });
+
+        if (!postRes.ok) {
+          const err = await postRes.text();
+          return {
+            content: [{ type: 'text', text: `Error publishing to dev.to: ${postRes.status} ${err}` }],
+            isError: true,
+          };
+        }
+
+        const postData = await postRes.json() as { url: string; id: number };
+        const postUrl = postData.url;
+
+        return {
+          content: [{
+            type: 'text',
+            text: `**Published to dev.to** (${published ? 'public' : 'draft'})\n\n**Title:** ${title}\n**URL:** ${postUrl}\n**Tags:** ${tags.join(', ') || 'none'}\n\n${!published ? '> Post is a draft — review and publish it from your dev.to dashboard.' : ''}`,
+          }],
+        };
+      } catch (error) {
+        const errorMessage = error instanceof Error ? error.message : String(error);
+        return {
+          content: [{ type: 'text', text: `Failed to publish to dev.to: ${errorMessage}` }],
           isError: true,
         };
       }

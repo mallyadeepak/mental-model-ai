@@ -20,7 +20,7 @@ Generate a JSON response with the following structure (respond ONLY with valid J
 
 {
   "id": "unique-id",
-  "title": "Clear, concise title for this mental model",
+  "title": "Approachable, descriptive title - written like a blog post headline (e.g. 'How X Works' or 'Understanding X'). Avoid bare noun phrases like 'X Systems'.",
   "summary": "A 1-2 sentence overview of the concept",
   "diagramType": "${diagramType}",
   "nodes": [
