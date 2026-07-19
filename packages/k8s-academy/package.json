@@ -1,0 +1,30 @@
+{
+  "name": "@k8s-academy/app",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Interactive, single-page app for learning Kubernetes with a live simulated cluster, kubectl terminal, and hands-on challenges",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc && vite build",
+    "preview": "vite preview",
+    "typecheck": "tsc --noEmit",
+    "clean": "rm -rf dist"
+  },
+  "dependencies": {
+    "react": "^18.3.0",
+    "react-dom": "^18.3.0",
+    "react-markdown": "^9.0.1",
+    "yaml": "^2.5.0"
+  },
+  "devDependencies": {
+    "@types/react": "^18.3.0",
+    "@types/react-dom": "^18.3.0",
+    "@vitejs/plugin-react": "^4.3.0",
+    "autoprefixer": "^10.4.0",
+    "postcss": "^8.4.0",
+    "tailwindcss": "^3.4.0",
+    "typescript": "^5.4.0",
+    "vite": "^5.4.0"
+  }
+}

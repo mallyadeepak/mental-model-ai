@@ -19,9 +19,19 @@ mental-model-ai/
 │   ├── core/           # Core AI logic and data structures
 │   ├── ui/             # React visualization components
 │   ├── web/            # Full-featured web application
-│   └── mcp-server/     # MCP server for Claude Code
+│   ├── mcp-server/     # MCP server for Claude Code
+│   └── k8s-academy/    # Interactive Kubernetes learning app (no API key needed)
 ├── package.json        # Root workspace configuration
 └── turbo.json          # Turbo build pipeline
+```
+
+### K8s Academy
+
+`packages/k8s-academy` is a standalone, single-page app for learning Kubernetes hands-on — no AI provider or API key required. It ships a persistent, in-browser simulated cluster (Nodes, scheduler, Deployments/ReplicaSets, Services, ConfigMaps/Secrets, Jobs/CronJobs, DaemonSets/StatefulSets) that you drive through a real `kubectl`-style terminal and a YAML editor, alongside 12 guided lessons with mental-model diagrams, hands-on challenges, and quizzes.
+
+```bash
+cd packages/k8s-academy
+pnpm dev      # http://localhost:3100
 ```
 
 ## Quick Start
