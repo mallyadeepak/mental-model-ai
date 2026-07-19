@@ -1,13 +1,34 @@
 // All data lives in localStorage, on this device, in this browser. Nothing
 // here ever leaves the machine — there is no server, no network call, no
-// account. That's a deliberate choice: worry entries are sensitive, and the
-// tool should never become one more place personal fears are collected.
+// account. That's a deliberate choice: worries, problems, and gratitude
+// entries are personal, and the tool should never become one more place
+// they get collected.
 
-const STORAGE_KEY = 'worry-compass:entries:v1';
+const STORAGE_KEY = 'vantage:entries:v1';
+const LEGACY_KEY = 'worry-compass:entries:v1';
 
 function uid() {
   return `${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 9)}`;
 }
+
+function migrateLegacy() {
+  try {
+    if (localStorage.getItem(STORAGE_KEY)) return;
+    const legacy = localStorage.getItem(LEGACY_KEY);
+    if (!legacy) return;
+    const parsed = JSON.parse(legacy);
+    if (!Array.isArray(parsed) || !parsed.length) return;
+    const migrated = parsed.map((e) => ({
+      ...e,
+      kind: e.kind || 'worry',
+      text: e.text ?? e.worryText,
+    }));
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(migrated));
+  } catch {
+    // Legacy data was malformed — start fresh rather than block the app.
+  }
+}
+migrateLegacy();
 
 function readAll() {
   try {
@@ -22,6 +43,13 @@ function readAll() {
 
 function writeAll(entries) {
   localStorage.setItem(STORAGE_KEY, JSON.stringify(entries));
+}
+
+// A "problem" entry is always something to act on; a "worry" entry only is
+// once it's been routed down the action fork (as opposed to released).
+// Gratitude entries never carry a follow-up.
+export function isActionable(entry) {
+  return entry.kind === 'problem' || (entry.kind === 'worry' && entry.path === 'action');
 }
 
 export function getEntries() {
@@ -74,10 +102,17 @@ function localDateString(isoString) {
 export function computeStats() {
   const entries = readAll();
   const total = entries.length;
-  const actionCount = entries.filter((e) => e.path === 'action').length;
-  const releaseCount = entries.filter((e) => e.path === 'release').length;
-  const completed = entries.filter((e) => e.path === 'action' && e.status === 'done');
-  const openFollowUps = entries.filter((e) => e.path === 'action' && e.status === 'open');
+
+  const worryCount = entries.filter((e) => e.kind === 'worry').length;
+  const problemCount = entries.filter((e) => e.kind === 'problem').length;
+  const gratitudeEntries = entries.filter((e) => e.kind === 'gratitude');
+  const gratitudeCount = gratitudeEntries.length;
+  const gratitudeItemCount = gratitudeEntries.reduce((sum, e) => sum + (e.gratitudeItems?.length || 0), 0);
+  const releasedCount = entries.filter((e) => e.kind === 'worry' && e.path === 'release').length;
+
+  const actionable = entries.filter(isActionable);
+  const completed = actionable.filter((e) => e.status === 'done');
+  const openFollowUps = actionable.filter((e) => e.status === 'open');
 
   const confidenceDeltas = completed
     .filter((e) => typeof e.confidenceBefore === 'number' && typeof e.confidenceAfter === 'number')
@@ -86,14 +121,22 @@ export function computeStats() {
     ? confidenceDeltas.reduce((a, b) => a + b, 0) / confidenceDeltas.length
     : null;
 
+  const recentGratitude = [...gratitudeEntries]
+    .sort((a, b) => b.createdAt.localeCompare(a.createdAt))
+    .slice(0, 3);
+
   return {
     total,
-    actionCount,
-    releaseCount,
+    worryCount,
+    problemCount,
+    gratitudeCount,
+    gratitudeItemCount,
+    releasedCount,
     completedCount: completed.length,
     openFollowUps,
     completedEntries: completed,
     avgConfidenceDelta,
+    recentGratitude,
   };
 }
 

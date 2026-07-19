@@ -1,9 +1,9 @@
-# Worry Compass
+# Vantage
 
-A small, private web app for practicing one specific skill: telling the
-difference between a **worry** and a **problem**, then handling each one the
-way that actually helps — solving what's solvable, and deliberately setting
-down what isn't.
+A small, private web app for practicing three related skills: untangling
+worry from problem-solving, working through problems directly, and
+noticing what's already good. All three are ways of gaining a steadier,
+more accurate view of your own situation — a better vantage point on it.
 
 This is a standalone project living alongside `mental-model-ai` in this
 repository. It doesn't share any code or dependencies with it — it's a
@@ -14,14 +14,17 @@ server) that runs entirely in your browser.
 
 Anxious thought tends to blur the line between "something I need to act on"
 and "a hypothetical spiral I can't do anything about" — everything ends up
-feeling equally urgent and equally unsolvable. This tool exists to force
-that distinction, every time, until doing it becomes a habit rather than an
-effort. That's the "muscle" in the tagline: it's a repeatable exercise, not
-a one-time fix.
+feeling equally urgent and equally unsolvable. And the flip side gets
+neglected too: what's already going well rarely gets noticed on purpose.
+Vantage exists to force both distinctions, every time, until doing it
+becomes a habit rather than an effort — a repeatable exercise, not a
+one-time fix.
 
-## The method
+## The three practices
 
-Each entry walks through the same six moves:
+Starting a new entry means picking one of three flows:
+
+### 🧭 Untangle a worry
 
 1. **Name the thought.** Writing a worry down as a specific sentence already
    reduces its grip — vague dread is harder to sit with than a concrete
@@ -36,30 +39,49 @@ Each entry walks through the same six moves:
    hypothetical / uncontrollable "what if"? The two need different
    responses, and treating one like the other is where most worry gets
    stuck.
-4. **If actionable — solve it.** A short version of Problem-Solving Therapy
-   (D'Zurilla & Nezu): define the problem precisely, generate options
-   without filtering, choose one, and commit to a specific next step with a
-   time and place attached (an "implementation intention" — shown in the
-   literature to meaningfully increase follow-through vs. a vague
-   intention).
-5. **If not actionable — set it down.** Separating what's in your control
-   from what isn't, and deliberately postponing or releasing the rest, is a
-   practiced skill — related to worry-postponement technique and the
-   classic dichotomy of control — not the same thing as suppression or
-   avoidance.
-6. **Bank the evidence.** Self-confidence isn't built by reassurance — it's
-   built from mastery experiences: specific, retrievable memories of "I said
-   I'd do something hard, and I did it" (Albert Bandura's self-efficacy
-   theory). The dashboard's evidence bank exists to make those memories easy
-   to find again, and the streak/weekly view exists to reinforce showing up
-   and doing the exercise repeatedly.
+4. **If actionable** — it drops into the same problem-solving flow as
+   below. **If not** — see "set it down" below.
+
+### 🧩 Work through a problem
+
+When something is already known to be actionable — no worry framing
+needed — this flow goes straight to a short version of Problem-Solving
+Therapy (D'Zurilla & Nezu): define the problem precisely, generate options
+without filtering, choose one, and commit to a specific next step with a
+time and place attached (an "implementation intention" — shown in the
+literature to meaningfully increase follow-through vs. a vague intention).
+
+**Set it down.** For worries that aren't actionable: separating what's in
+your control from what isn't, and deliberately postponing or releasing the
+rest, is a practiced skill — related to worry-postponement technique and
+the classic dichotomy of control — not the same thing as suppression or
+avoidance.
+
+### ☀️ Notice something good
+
+A quick gratitude check-in and free journal. Gratitude journaling has a
+real, replicated effect on wellbeing (Emmons & McCullough), and
+elaborating on *why* something matters — rather than just listing it —
+amplifies the benefit (Lyubomirsky's research on savoring), consistent
+with the broaden-and-build theory of positive emotion (Fredrickson). An
+optional free-write step exists for whatever else doesn't fit neatly into
+either worry or gratitude.
+
+### Bank the evidence
+
+Self-confidence isn't built by reassurance — it's built from mastery
+experiences: specific, retrievable memories of "I said I'd do something
+hard, and I did it" (Albert Bandura's self-efficacy theory). The
+dashboard's evidence bank collects completed plans from both the worry and
+problem flows, and the streak/weekly view exists to reinforce showing up
+and doing the exercise repeatedly.
 
 ## Running it
 
 No install, no build, no dependencies.
 
 ```bash
-cd worry-compass
+cd vantage
 python3 -m http.server 8080
 # then open http://localhost:8080
 ```
@@ -75,10 +97,14 @@ analytics — nothing typed into this app is ever sent anywhere. Clearing
 your browser's site data for this app will erase your history, so keep that
 in mind if you want a long-term record.
 
+If you have data from an earlier version of this project (Worry Compass),
+it's picked up automatically the first time Vantage loads — no action
+needed.
+
 ## Project structure
 
 ```
-worry-compass/
+vantage/
 ├── index.html        # markup + all tab panels
 ├── styles.css         # theme (light/dark), layout, components
 ├── js/

@@ -22,16 +22,17 @@ function arcPath(cx, cy, rOuter, rInner, startAngle, endAngle) {
   ].join(' ');
 }
 
-// Renders a two-series donut (action vs release) with a hero number in the
-// center and a gap between segments per dataviz mark spacing rules.
-export function renderRatioDonut({ actionCount, releaseCount }) {
-  const total = actionCount + releaseCount;
+// Renders an N-series donut with a hero number in the center and a gap
+// between segments per dataviz mark spacing rules. `segments` is
+// [{ value, colorVar, label }]; zero-value segments are skipped.
+export function renderKindDonut(segments) {
+  const total = segments.reduce((sum, seg) => sum + seg.value, 0);
   const size = 160;
   const cx = size / 2;
   const cy = size / 2;
   const rOuter = 70;
   const rInner = 46;
-  const gapRad = total > 0 ? 0.035 : 0; // ~2px visual gap between segments
+  const gapRad = 0.035; // ~2px visual gap between segments
 
   if (total === 0) {
     return `
@@ -42,23 +43,27 @@ export function renderRatioDonut({ actionCount, releaseCount }) {
       </svg>`;
   }
 
-  const actionFrac = actionCount / total;
-  const startAngle = -Math.PI / 2;
-  const actionEnd = startAngle + actionFrac * TAU;
+  let angle = -Math.PI / 2;
+  let paths = '';
+  const activeCount = segments.filter((s) => s.value > 0).length;
+  segments.forEach((seg) => {
+    if (seg.value <= 0) return;
+    const frac = seg.value / total;
+    const sweep = frac * TAU;
+    const gap = activeCount > 1 ? gapRad : 0;
+    const segStart = angle + gap / 2;
+    const segEnd = angle + sweep - gap / 2;
+    if (segEnd > segStart) {
+      paths += `<path d="${arcPath(cx, cy, rOuter, rInner, segStart, segEnd)}"
+        fill="var(${seg.colorVar})"><title>${seg.label}: ${seg.value}</title></path>`;
+    }
+    angle += sweep;
+  });
 
-  let segments = '';
-  if (actionCount > 0) {
-    segments += `<path d="${arcPath(cx, cy, rOuter, rInner, startAngle + gapRad / 2, actionEnd - (releaseCount > 0 ? gapRad / 2 : -gapRad / 2))}"
-      fill="var(--series-action)"><title>Turned into action: ${actionCount}</title></path>`;
-  }
-  if (releaseCount > 0) {
-    segments += `<path d="${arcPath(cx, cy, rOuter, rInner, actionEnd + (actionCount > 0 ? gapRad / 2 : -gapRad / 2), startAngle + TAU - gapRad / 2)}"
-      fill="var(--series-release)"><title>Released: ${releaseCount}</title></path>`;
-  }
-
+  const summary = segments.map((s) => `${s.value} ${s.label.toLowerCase()}`).join(', ');
   return `
-    <svg viewBox="0 0 ${size} ${size}" class="donut" role="img" aria-label="${actionCount} turned into action, ${releaseCount} released">
-      ${segments}
+    <svg viewBox="0 0 ${size} ${size}" class="donut" role="img" aria-label="${summary}">
+      ${paths}
       <text x="${cx}" y="${cy - 6}" class="donut-hero" text-anchor="middle" dominant-baseline="central">${total}</text>
       <text x="${cx}" y="${cy + 16}" class="donut-hero-label" text-anchor="middle" dominant-baseline="central">total</text>
     </svg>`;

@@ -9,8 +9,9 @@
   --border: rgba(11, 11, 11, 0.10);
   --border-strong: rgba(11, 11, 11, 0.16);
 
-  --series-action: #2a78d6;
-  --series-release: #008300;
+  --series-worry: #2a78d6;
+  --series-problem: #4a3aa7;
+  --series-gratitude: #eda100;
   --status-good: #0ca30c;
 
   --accent: #2a78d6;
@@ -35,8 +36,9 @@
     --border: rgba(255, 255, 255, 0.10);
     --border-strong: rgba(255, 255, 255, 0.18);
 
-    --series-action: #3987e5;
-    --series-release: #008300;
+    --series-worry: #3987e5;
+    --series-problem: #9085e9;
+    --series-gratitude: #c98500;
     --status-good: #0ca30c;
 
     --accent: #3987e5;
@@ -44,6 +46,13 @@
     --shadow-card: 0 1px 2px rgba(0, 0, 0, 0.2), 0 8px 24px rgba(0, 0, 0, 0.35);
   }
 }
+
+/* The wizard's accent shifts to match whichever practice is active, so the
+   Continue buttons, progress dots, and focus rings reinforce which of the
+   three flows you're in. */
+#wizard-root[data-kind="worry"] { --accent: var(--series-worry); }
+#wizard-root[data-kind="problem"] { --accent: var(--series-problem); }
+#wizard-root[data-kind="gratitude"] { --accent: var(--series-gratitude); }
 
 * { box-sizing: border-box; }
 
@@ -277,8 +286,33 @@ input[type="range"] { width: 100%; accent-color: var(--accent); }
 
 .btn-fork span { font-weight: 400; font-size: 12.5px; opacity: 0.9; }
 
-.btn-fork-action { background: var(--series-action); }
+.btn-fork-action { background: var(--series-worry); }
 .btn-fork-release { background: var(--release-accent); }
+
+.kind-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+  margin: 18px 0;
+}
+
+.btn-kind {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 4px;
+  padding: 18px;
+  border-radius: var(--radius-md);
+  color: #ffffff;
+  text-align: left;
+}
+
+.btn-kind span:not(.kind-icon) { font-weight: 400; font-size: 12.5px; opacity: 0.9; }
+.kind-icon { font-size: 22px; margin-bottom: 2px; }
+
+.btn-kind-worry { background: var(--series-worry); }
+.btn-kind-problem { background: var(--series-problem); }
+.btn-kind-gratitude { background: var(--series-gratitude); }
 
 .fork-help {
   font-size: 13.5px;
@@ -369,10 +403,13 @@ input[type="range"] { width: 100%; accent-color: var(--accent); }
   color: #fff;
 }
 
-.tag-action { background: var(--series-action); }
-.tag-release { background: var(--release-accent); }
+.tag-worry { background: var(--series-worry); }
+.tag-problem { background: var(--series-problem); }
+.tag-gratitude { background: var(--series-gratitude); }
 .tag-open { background: var(--text-muted); }
 .tag-done { background: var(--status-good); }
+.tag-muted { background: var(--text-muted); }
+.tag-mini { font-size: 10px; padding: 2px 7px; margin-right: 6px; vertical-align: middle; }
 
 .entry-worry { font-size: 14.5px; margin: 4px 0 8px; }
 .entry-reframe, .entry-distortions {
@@ -462,8 +499,9 @@ input[type="range"] { width: 100%; accent-color: var(--accent); }
 .legend li { display: flex; align-items: center; gap: 8px; }
 
 .legend-swatch { width: 10px; height: 10px; border-radius: 3px; display: inline-block; }
-.swatch-action { background: var(--series-action); }
-.swatch-release { background: var(--series-release); }
+.swatch-worry { background: var(--series-worry); }
+.swatch-problem { background: var(--series-problem); }
+.swatch-gratitude { background: var(--series-gratitude); }
 
 .follow-up-item {
   display: flex;
@@ -487,6 +525,28 @@ input[type="range"] { width: 100%; accent-color: var(--accent); }
 .evidence-action { font-weight: 600; font-size: 13.5px; margin: 0 0 3px; }
 .evidence-outcome { font-size: 13px; color: var(--text-secondary); margin: 0 0 4px; }
 .evidence-confidence { font-size: 12px; color: var(--status-good); font-weight: 600; }
+
+.gratitude-items {
+  margin: 0 0 6px;
+  padding-left: 20px;
+  font-size: 13.5px;
+}
+
+.gratitude-items li { margin-bottom: 2px; }
+
+.gratitude-reflection {
+  font-size: 13px;
+  color: var(--text-secondary);
+  font-style: italic;
+  margin: 0;
+}
+
+.gratitude-card {
+  padding: 10px 0;
+  border-bottom: 1px solid var(--gridline);
+}
+
+.gratitude-card:last-child { border-bottom: none; }
 
 /* About */
 
@@ -535,6 +595,7 @@ input[type="range"] { width: 100%; accent-color: var(--accent); }
   .stat-grid { grid-template-columns: 1fr 1fr; }
   .dashboard-row { grid-template-columns: 1fr; }
   .fork-buttons { grid-template-columns: 1fr; }
+  .kind-grid { grid-template-columns: 1fr; }
   .distortion-grid { grid-template-columns: 1fr; }
   .panel-card { padding: 20px; }
 }
