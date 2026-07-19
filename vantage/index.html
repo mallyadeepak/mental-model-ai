@@ -1,0 +1,155 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="color-scheme" content="light dark" />
+  <title>Vantage — perspective, practiced daily</title>
+  <meta name="description" content="A private, on-device practice for turning worry into action, working through problems, and noticing what's good." />
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🧭</text></svg>" />
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <div class="app">
+    <header class="app-header">
+      <div class="brand">
+        <span class="brand-mark" aria-hidden="true">🧭</span>
+        <div>
+          <h1>Vantage</h1>
+          <p class="tagline">Turn worry into action, notice what's good, and build a steadier mind.</p>
+        </div>
+      </div>
+      <nav class="tabs" role="tablist" aria-label="Sections">
+        <button class="tab-btn is-active" data-tab="new" role="tab" aria-selected="true">New Entry</button>
+        <button class="tab-btn" data-tab="history" role="tab" aria-selected="false">History</button>
+        <button class="tab-btn" data-tab="dashboard" role="tab" aria-selected="false">Dashboard</button>
+        <button class="tab-btn" data-tab="about" role="tab" aria-selected="false">About</button>
+      </nav>
+    </header>
+
+    <main>
+      <section id="tab-new" class="tab-panel is-active">
+        <div class="panel-card">
+          <div id="wizard-root"></div>
+        </div>
+      </section>
+
+      <section id="tab-history" class="tab-panel">
+        <div class="panel-card">
+          <div class="panel-header">
+            <h2>History</h2>
+            <div class="history-filters">
+              <button class="history-filter is-active" data-filter="all">All</button>
+              <button class="history-filter" data-filter="worry">🧭 Worry</button>
+              <button class="history-filter" data-filter="problem">🧩 Problem</button>
+              <button class="history-filter" data-filter="gratitude">☀️ Gratitude</button>
+              <button class="history-filter" data-filter="pending">Pending follow-up</button>
+            </div>
+          </div>
+          <p id="history-empty" class="empty-note">No entries yet — anything you log will show up here.</p>
+          <div id="history-list" class="entry-list"></div>
+        </div>
+      </section>
+
+      <section id="tab-dashboard" class="tab-panel">
+        <div class="panel-card">
+          <h2>Dashboard</h2>
+          <div class="stat-grid">
+            <div class="stat-tile">
+              <span class="stat-value" id="stat-total">0</span>
+              <span class="stat-label">Entries logged</span>
+            </div>
+            <div class="stat-tile">
+              <span class="stat-value" id="stat-streak">0</span>
+              <span class="stat-label">Day streak</span>
+            </div>
+            <div class="stat-tile">
+              <span class="stat-value" id="stat-completed">0</span>
+              <span class="stat-label">Worked through</span>
+            </div>
+            <div class="stat-tile">
+              <span class="stat-value" id="stat-gratitude-items">0</span>
+              <span class="stat-label">Gratitude moments</span>
+            </div>
+          </div>
+
+          <div class="dashboard-row">
+            <div class="dashboard-block">
+              <h3>This week</h3>
+              <div id="week-strip-root"></div>
+            </div>
+            <div class="dashboard-block">
+              <h3>Practice mix</h3>
+              <div class="donut-wrap">
+                <div id="donut-root"></div>
+                <ul class="legend">
+                  <li><span class="legend-swatch swatch-worry"></span>🧭 Worry</li>
+                  <li><span class="legend-swatch swatch-problem"></span>🧩 Problem</li>
+                  <li><span class="legend-swatch swatch-gratitude"></span>☀️ Gratitude</li>
+                </ul>
+              </div>
+            </div>
+          </div>
+
+          <div class="dashboard-block">
+            <h3>Open follow-ups</h3>
+            <div id="follow-ups-list"></div>
+          </div>
+
+          <div class="dashboard-block">
+            <h3>Evidence bank</h3>
+            <p class="step-hint" id="confidence-delta-note">Proof, in your own words, that you followed through — this is what self-confidence is actually built from.</p>
+            <div id="evidence-list"></div>
+          </div>
+
+          <div class="dashboard-block">
+            <h3>Recent gratitude</h3>
+            <div id="recent-gratitude-list"></div>
+          </div>
+        </div>
+      </section>
+
+      <section id="tab-about" class="tab-panel">
+        <div class="panel-card about-content">
+          <h2>About Vantage</h2>
+          <p>Vantage is a small, private tool for practicing three related skills: untangling worry from problem-solving, working through problems directly, and noticing what's already good. All three are ways of gaining a steadier, more accurate view of your own situation — a better vantage point on it.</p>
+
+          <h3>Untangle a worry</h3>
+          <ul>
+            <li><strong>Name the thought.</strong> Writing a worry down, specifically, already reduces its grip — vague dread is harder to sit with than a concrete sentence.</li>
+            <li><strong>Check for thinking patterns.</strong> Ten common cognitive distortions (Aaron Beck, David Burns) — catastrophizing, fortune-telling, mind reading, and others — quietly inflate how bad or likely something seems. Naming the pattern makes it easier to question.</li>
+            <li><strong>Ask if it's actionable.</strong> This is the core move from CBT-based worry management (Borkovec, Leahy): is this a present, near-term problem you can influence, or a hypothetical / uncontrollable "what if"? The two need completely different responses.</li>
+            <li><strong>If actionable — solve it.</strong> If not — set it down.</li>
+          </ul>
+
+          <h3>Work through a problem</h3>
+          <p>When something is already known to be actionable — no worry framing needed — Vantage goes straight to a short structured version of Problem-Solving Therapy (D'Zurilla &amp; Nezu): define the problem precisely, generate options without filtering, choose one, and commit to a specific next step with a time and place attached (an "implementation intention," shown to meaningfully increase follow-through). Completed plans land in the evidence bank below.</p>
+
+          <h3>Set a worry down</h3>
+          <p>Distinguishing what's in your control from what isn't, and deliberately postponing or releasing the rest, is a practiced skill (related to worry-postponement technique and the classic "dichotomy of control"), not the same thing as suppression or avoidance.</p>
+
+          <h3>Notice something good</h3>
+          <p>Gratitude journaling has a real, replicated effect on wellbeing (Emmons &amp; McCullough), and elaborating on <em>why</em> something matters — rather than just listing it — amplifies the benefit (Lyubomirsky's research on savoring), consistent with the broaden-and-build theory of positive emotion (Fredrickson). The optional free-journal step exists for whatever else doesn't fit neatly into either worry or gratitude.</p>
+
+          <h3>Bank the evidence</h3>
+          <p>Self-confidence isn't built by reassurance — it's built from mastery experiences: specific memories of "I said I'd do something hard, and I did it" (Albert Bandura's self-efficacy theory). The evidence bank exists to make those memories easy to find again.</p>
+
+          <h3>Your data</h3>
+          <p>Everything you write is stored only in this browser's local storage, on this device. There is no account, no server, and no analytics — nothing you write is ever sent anywhere. Clearing your browser data will erase it, so consider that if you want to keep a long history.</p>
+
+          <h3>A note on scope</h3>
+          <p>This is a self-reflection and practice tool, not therapy, diagnosis, or medical advice, and it isn't a substitute for working with a qualified therapist or psychiatrist — especially if worry is severe, persistent, or affecting daily functioning. If you're in crisis or thinking about harming yourself, please contact a mental health professional or a crisis line right away — in the US, you can call or text <strong>988</strong> (Suicide &amp; Crisis Lifeline).</p>
+        </div>
+      </section>
+    </main>
+
+    <footer class="app-footer">
+      <p>Private by design — your entries never leave this device. This is a self-help practice tool, not therapy. If you're in crisis, please contact a mental health professional or a crisis line (e.g. 988 in the US).</p>
+    </footer>
+  </div>
+
+  <div id="modal-root" class="modal-root"></div>
+
+  <script type="module" src="js/app.js"></script>
+</body>
+</html>
