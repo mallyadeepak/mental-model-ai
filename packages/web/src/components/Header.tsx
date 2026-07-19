@@ -1,14 +1,10 @@
-import { ThemeToggle } from './ThemeToggle';
-
 interface HeaderProps {
   onSettingsClick: () => void;
   onClear: () => void;
   hasModel: boolean;
-  isDark: boolean;
-  onToggleTheme: () => void;
 }
 
-export function Header({ onSettingsClick, onClear, hasModel, isDark, onToggleTheme }: HeaderProps) {
+export function Header({ onSettingsClick, onClear, hasModel }: HeaderProps) {
   return (
     <header className="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 px-6 py-4">
       <div className="flex items-center justify-between">
@@ -37,7 +33,6 @@ export function Header({ onSettingsClick, onClear, hasModel, isDark, onToggleThe
               Clear
             </button>
           )}
-          <ThemeToggle isDark={isDark} onToggle={onToggleTheme} />
           <button
             onClick={onSettingsClick}
             className="px-4 py-2 text-sm font-medium text-gray-600 dark:text-gray-300

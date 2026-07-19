@@ -143,7 +143,7 @@ function calculatePositions(model: MentalModel): MentalModel {
   return model;
 }
 
-export function useMentalModel({ provider, apiKey }: UseMentalModelOptions): UseMentalModelReturn {
+export function useMentalModel({ apiKey }: UseMentalModelOptions): UseMentalModelReturn {
   const [model, setModel] = useState<MentalModel | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);

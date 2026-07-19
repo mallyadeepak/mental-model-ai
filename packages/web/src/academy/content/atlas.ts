@@ -1,0 +1,122 @@
+import { buildModel } from './builder.js';
+
+export const ATLAS_ID = 'atlas';
+
+export const atlasModel = buildModel({
+  id: ATLAS_ID,
+  title: 'LLM & Agent Systems',
+  summary:
+    'The full map of how modern LLM applications are designed: from a raw model call up to fleets of coordinated agents running in production. Click any pillar to go deep.',
+  nodes: [
+    {
+      id: 'hub',
+      label: 'LLM & Agent Systems',
+      description: 'One model call is easy. A reliable system around it is the whole discipline.',
+      depth: 0,
+      nodeType: 'concept',
+    },
+    {
+      id: 'foundations',
+      label: 'Foundation Models',
+      description: 'Transformers, tokens, context windows, sampling — what the model actually is.',
+      depth: 1,
+      nodeType: 'concept',
+    },
+    {
+      id: 'prompting',
+      label: 'Prompt & Context Engineering',
+      description: 'Shaping instructions, examples, and context so the model does what you mean.',
+      depth: 1,
+      nodeType: 'process',
+    },
+    {
+      id: 'tool_use',
+      label: 'Tool Use & Function Calling',
+      description: 'Giving the model hands: structured calls out into real systems.',
+      depth: 1,
+      nodeType: 'process',
+    },
+    {
+      id: 'rag',
+      label: 'Retrieval-Augmented Generation',
+      description: 'Giving the model eyes: grounding answers in retrieved, current knowledge.',
+      depth: 1,
+      nodeType: 'process',
+    },
+    {
+      id: 'agents',
+      label: 'Agents & Agentic Loops',
+      description: 'Wrapping the model in a loop so it can plan, act, observe, and iterate.',
+      depth: 1,
+      nodeType: 'concept',
+    },
+    {
+      id: 'memory',
+      label: 'Memory & State',
+      description: 'What the system remembers across one turn, one session, and many sessions.',
+      depth: 1,
+      nodeType: 'concept',
+    },
+    {
+      id: 'multi_agent',
+      label: 'Multi-Agent Systems',
+      description: 'When one loop is not enough: specialized agents coordinating on a task.',
+      depth: 1,
+      nodeType: 'concept',
+    },
+    {
+      id: 'frameworks',
+      label: 'Frameworks & Protocols',
+      description: 'LangGraph, CrewAI, AutoGen, Agent SDKs, MCP — the tooling layer, and how to choose.',
+      depth: 1,
+      nodeType: 'example',
+    },
+    {
+      id: 'evaluation',
+      label: 'Evaluation & Observability',
+      description: 'Knowing whether any of this actually works, before and after shipping.',
+      depth: 1,
+      nodeType: 'process',
+    },
+    {
+      id: 'production',
+      label: 'Production Architecture & Safety',
+      description: 'Latency, cost, guardrails, and failure containment at real scale.',
+      depth: 1,
+      nodeType: 'concept',
+    },
+  ],
+  edges: [
+    { source: 'hub', target: 'foundations', edgeType: 'contains' },
+    { source: 'hub', target: 'prompting', edgeType: 'contains' },
+    { source: 'hub', target: 'tool_use', edgeType: 'contains' },
+    { source: 'hub', target: 'rag', edgeType: 'contains' },
+    { source: 'hub', target: 'agents', edgeType: 'contains' },
+    { source: 'hub', target: 'memory', edgeType: 'contains' },
+    { source: 'hub', target: 'multi_agent', edgeType: 'contains' },
+    { source: 'hub', target: 'frameworks', edgeType: 'contains' },
+    { source: 'hub', target: 'evaluation', edgeType: 'contains' },
+    { source: 'hub', target: 'production', edgeType: 'contains' },
+    { source: 'foundations', target: 'prompting', label: 'is steered by', edgeType: 'leads_to' },
+    { source: 'prompting', target: 'tool_use', label: 'requests', edgeType: 'leads_to' },
+    { source: 'rag', target: 'prompting', label: 'feeds context into', edgeType: 'leads_to' },
+    { source: 'tool_use', target: 'agents', label: 'composes into', edgeType: 'depends_on' },
+    { source: 'agents', target: 'memory', label: 'reads/writes', edgeType: 'depends_on' },
+    { source: 'agents', target: 'multi_agent', label: 'scales to', edgeType: 'leads_to' },
+    { source: 'frameworks', target: 'agents', label: 'implements', edgeType: 'relates' },
+    { source: 'frameworks', target: 'multi_agent', label: 'orchestrates', edgeType: 'relates' },
+    { source: 'evaluation', target: 'agents', label: 'measures', edgeType: 'relates' },
+    { source: 'evaluation', target: 'rag', label: 'measures', edgeType: 'relates' },
+    { source: 'production', target: 'evaluation', label: 'depends on', edgeType: 'depends_on' },
+    { source: 'production', target: 'multi_agent', label: 'hosts', edgeType: 'contains' },
+  ],
+  analogies: [
+    {
+      concept: 'LLM & Agent Systems',
+      realWorldExample: 'Hiring a brilliant new employee',
+      explanation:
+        'The foundation model is the raw talent. Prompting is onboarding and instructions. Tools and RAG are the systems and files they get access to. Agents are giving them a task list and letting them work autonomously. Multi-agent is building a team. Evaluation is performance review. Production architecture is HR, security, and IT keeping the whole company running.',
+      relatedNodeId: 'hub',
+    },
+  ],
+});

@@ -2,8 +2,20 @@
 
 An interactive tool that explains complex concepts through visual mental model diagrams with real-world analogies. Powered by AI (Anthropic Claude or OpenAI GPT).
 
+## LLM & Agents Academy
+
+The web app's default view is **LLM & Agents Academy** — a self-contained, hand-curated learning app for LLM and agent system design, built on top of the same diagram engine as the AI generator. It's designed to "start high, go deep":
+
+- **The Atlas** — a single map of the ten pillars of LLM & agent system design (foundation models, prompting, tool use, RAG, agents, memory, multi-agent systems, frameworks & protocols, evaluation, and production architecture) and how they relate.
+- **Pillar deep dives** — click any pillar for its own diagram plus design principles, trade-offs, relevant frameworks, and a code sketch.
+- **Leaf deep dives** — the highest-leverage sub-patterns (the ReAct loop, planning patterns, multi-agent orchestration, MCP, choosing a framework, the RAG pipeline, tool-contract anatomy, guardrail architecture) get their own focused page, reached by drilling into specific diagram nodes. Breadcrumbs always let you climb back up.
+- **Decision Playbook** — a problem-first cheat sheet ("I need the model to take real actions", "I need to guarantee JSON output", ...) that maps a plain-English problem to a recommended pattern, with links straight into the relevant pages.
+
+All content is authored locally in `packages/web/src/academy/content` — no API key required to use it. The original AI-powered generator (below) is still available as a second tab in the app.
+
 ## Features
 
+- **LLM & Agents Academy**: a curated, drill-down curriculum on LLM/agent system design — see above
 - Generate hierarchical mind maps, flowcharts, and concept maps
 - Real-world analogies to make abstract concepts tangible
 - Interactive node expansion for deeper exploration
@@ -19,6 +31,7 @@ mental-model-ai/
 │   ├── core/           # Core AI logic and data structures
 │   ├── ui/             # React visualization components
 │   ├── web/            # Full-featured web application
+│   │   └── src/academy/  # LLM & Agents Academy: curated content + views
 │   └── mcp-server/     # MCP server for Claude Code
 ├── package.json        # Root workspace configuration
 └── turbo.json          # Turbo build pipeline
