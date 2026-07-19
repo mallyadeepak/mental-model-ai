@@ -20,9 +20,20 @@ mental-model-ai/
 │   ├── ui/             # React visualization components
 │   ├── web/            # Full-featured web application
 │   └── mcp-server/     # MCP server for Claude Code
+├── vantage/             # Separate project — see "Other projects" below
 ├── package.json        # Root workspace configuration
 └── turbo.json          # Turbo build pipeline
 ```
+
+## Other projects in this repo
+
+This repository also hosts standalone projects that aren't part of the
+`packages/` workspace above — each is self-contained with its own README
+and no shared dependencies.
+
+- **[`vantage/`](vantage/README.md)** — a private, on-device web app for
+  turning worry into action, working through problems, and practicing
+  gratitude. Plain HTML/CSS/JS, no build step; see its README for details.
 
 ## Quick Start
 
