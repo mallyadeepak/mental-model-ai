@@ -1,0 +1,28 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  @apply bg-ink-50 text-ink-900 dark:bg-ink-950 dark:text-ink-50;
+  font-family: 'Inter', system-ui, sans-serif;
+}
+
+::selection {
+  @apply bg-sunset-300/60;
+}
+
+.font-display {
+  font-family: 'Fraunces', Georgia, serif;
+}
+
+.scrollbar-thin::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+.scrollbar-thin::-webkit-scrollbar-thumb {
+  @apply bg-ink-300 dark:bg-ink-700 rounded-full;
+}

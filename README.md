@@ -16,12 +16,26 @@ An interactive tool that explains complex concepts through visual mental model d
 ```
 mental-model-ai/
 ├── packages/
-│   ├── core/           # Core AI logic and data structures
-│   ├── ui/             # React visualization components
-│   ├── web/            # Full-featured web application
-│   └── mcp-server/     # MCP server for Claude Code
+│   ├── core/              # Core AI logic and data structures
+│   ├── ui/                # React visualization components
+│   ├── web/                # Full-featured web application
+│   ├── mcp-server/         # MCP server for Claude Code
+│   └── travel-explorer/    # Wayfinder: solo-travel city explorer & itinerary builder
 ├── package.json        # Root workspace configuration
 └── turbo.json          # Turbo build pipeline
+```
+
+### Wayfinder (`packages/travel-explorer`)
+
+A standalone React app for planning solo trips: a filterable directory of cities curated for
+café culture, nightlife, and ease of meeting people; per-city profiles (cafés, bars, restaurants,
+"meet people" ideas, safety notes); and an interactive itinerary builder that generates a
+day-by-day plan weighted toward your interests (café culture, nightlife/social, food, outdoors,
+culture/history). Trips and favorites are saved locally in the browser. No API key required.
+
+```bash
+cd packages/travel-explorer
+pnpm dev      # http://localhost:3001
 ```
 
 ## Quick Start
