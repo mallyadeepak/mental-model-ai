@@ -20,9 +20,16 @@ mental-model-ai/
 │   ├── ui/             # React visualization components
 │   ├── web/            # Full-featured web application
 │   └── mcp-server/     # MCP server for Claude Code
+├── apps/
+│   └── systems-architecture-guide/  # Standalone interactive field guide (see below)
+├── mental-models/       # Generated mental model docs (mermaid + markdown)
 ├── package.json        # Root workspace configuration
 └── turbo.json          # Turbo build pipeline
 ```
+
+### Systems & Architecture Field Guide
+
+[`apps/systems-architecture-guide`](apps/systems-architecture-guide) is a standalone, single-file interactive mental model covering system design, architecture principles, and code-level judgment for principal engineers — click-to-drill-down as deep as a topic warrants, with real-world analogies and "why it matters" notes at every node. No build step: open `apps/systems-architecture-guide/index.html` directly in a browser.
 
 ## Quick Start
 
